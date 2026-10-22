@@ -1,0 +1,75 @@
+<section class="detail-page" aria-label="Détail de la tâche">
+  <a routerLink="/tasks" class="back-link" aria-label="Retour à la liste des tâches">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+      <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+    </svg>
+    Retour à la liste
+  </a>
+
+  @if (task() === undefined) {
+    <div class="detail-loading" role="status" aria-live="polite">
+      <p>Chargement…</p>
+    </div>
+  } @else if (task() === null) {
+    <div class="detail-error" role="alert">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16" class="detail-error__icon" aria-hidden="true">
+        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+      </svg>
+      <h2 class="detail-error__title">Tâche introuvable</h2>
+      <p class="detail-error__desc">L'identifiant fourni ne correspond à aucune tâche existante.</p>
+      <a routerLink="/tasks" class="btn-primary">Retour à la liste</a>
+    </div>
+  } @else {
+    <article class="detail-card">
+      <header class="detail-card__header">
+        <div class="detail-card__badge-row">
+          <span class="priority-badge" [class]="'priority-badge--' + task()!.priority">
+            {{ priorityLabel[task()!.priority] }}
+          </span>
+          <span class="status-badge" [class]="task()!.done ? 'status-badge--done' : 'status-badge--active'">
+            {{ task()!.done ? 'Terminée' : 'Active' }}
+          </span>
+        </div>
+        <h1 class="detail-card__title" [class.detail-card__title--done]="task()!.done">
+          {{ task()!.title }}
+        </h1>
+      </header>
+
+      <dl class="detail-card__info">
+        <div class="detail-info-row">
+          <dt class="detail-info-label">Identifiant</dt>
+          <dd class="detail-info-value">#{{ task()!.id }}</dd>
+        </div>
+        <div class="detail-info-row">
+          <dt class="detail-info-label">Titre</dt>
+          <dd class="detail-info-value">{{ task()!.title }}</dd>
+        </div>
+        <div class="detail-info-row">
+          <dt class="detail-info-label">Priorité</dt>
+          <dd class="detail-info-value">
+            <span class="priority-badge" [class]="'priority-badge--' + task()!.priority">
+              {{ priorityLabel[task()!.priority] }}
+            </span>
+          </dd>
+        </div>
+        <div class="detail-info-row">
+          <dt class="detail-info-label">État</dt>
+          <dd class="detail-info-value">
+            <span class="status-badge" [class]="task()!.done ? 'status-badge--done' : 'status-badge--active'">
+              {{ task()!.done ? 'Terminée' : 'Active' }}
+            </span>
+          </dd>
+        </div>
+      </dl>
+
+      <footer class="detail-card__footer">
+        <a routerLink="/tasks" class="btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+            <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
+          </svg>
+          Retour à la liste
+        </a>
+      </footer>
+    </article>
+  }
+</section>
