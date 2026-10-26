@@ -6,6 +6,9 @@ describe('TaskService', () => {
   let service: TaskService;
 
   beforeEach(() => {
+    // TODO Mission 8 : ajoute ici  localStorage.clear();
+    //   Sans ça, ce qu'un test enregistre dans le localStorage est relu par le test suivant,
+    //   et les tests ne partent plus tous des mêmes tâches de départ.
     TestBed.configureTestingModule({});
     service = TestBed.inject(TaskService);
   });
@@ -194,4 +197,22 @@ describe('TaskService', () => {
       expect(service.remainingCount()).toBe(before);
     });
   });
+
+  // TODO Mission 6 : ajoute ici un bloc de tests pour removeDone(), sur le modèle du bloc « remove() » au-dessus :
+  //   describe('removeDone()', () => {
+  //     it('devrait supprimer toutes les taches terminees', () => {
+  //       service.removeDone();
+  //       // vérifie qu'aucune tâche restante n'a done à true :
+  //       // expect(service.tasks().some((t: Task) => t.done)).toBe(false);
+  //     });
+  //     it('ne devrait pas supprimer les taches actives', () => {
+  //       // compte les tâches actives avant, appelle removeDone(), puis vérifie qu'il y en a toujours autant
+  //     });
+  //   });
+
+  // TODO Mission 10 : ajoute ici un bloc de tests pour update(), avec au moins ces 4 tests :
+  //   - update() change le titre et la priorité de la tâche demandée (vérifie avec service.getById(...))
+  //   - update() enlève les espaces au début et à la fin du titre
+  //   - update() ne change rien si le nouveau titre fait moins de 3 caractères
+  //   - update() ne change pas les autres tâches
 });

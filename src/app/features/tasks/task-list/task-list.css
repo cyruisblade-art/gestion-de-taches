@@ -71,6 +71,19 @@
   outline-offset: 2px;
 }
 
+/* TODO Mission 7 : écris ici le style du champ de recherche (classe .search-input).
+   Pour qu'il ressemble aux champs du formulaire, copie les règles de .form-input
+   qui se trouvent dans task-form/task-form.css, et ajoute un margin-bottom: 1rem;
+   N'utilise que des couleurs en var(--...) définies dans src/styles.css. */
+
+/* TODO Mission 6 : écris ici le style du bouton (classe .btn-remove-done).
+   Il supprime des tâches : utilise les couleurs « danger », comme le bouton
+   « Supprimer » de task-item/task-item.css (.btn--danger) :
+     background: var(--color-danger-ghost);
+     color: var(--color-danger);
+     border: 1px solid var(--color-danger-light);
+   Pense aussi au :hover et au cursor: pointer; */
+
 /* --- Tasks container --- */
 .tasks-container {
   min-height: 200px;

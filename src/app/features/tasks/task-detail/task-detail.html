@@ -6,6 +6,12 @@
     Retour à la liste
   </a>
 
+  <!--
+    TODO Mission 9 (étape 4) : une fois que « task » est un computed dans task-detail.ts,
+      il ne vaut plus jamais undefined. Supprime le bloc « Chargement… » ci-dessous
+      (de « @if (task() === undefined) { » jusqu'au « } » avant « @else if »),
+      et transforme « } @else if (task() === null) { » en « @if (task() === null) { ».
+  -->
   @if (task() === undefined) {
     <div class="detail-loading" role="status" aria-live="polite">
       <p>Chargement…</p>
@@ -60,9 +66,43 @@
             </span>
           </dd>
         </div>
+        <!--
+          TODO Bonus C : ajoute ici une ligne « Date limite », sur le modèle des lignes au-dessus
+          (un <div class="detail-info-row"> avec un <dt> et un <dd>).
+          Affiche task()!.dueDate, ou « Aucune » si la tâche n'a pas de date.
+        -->
       </dl>
 
+      <!--
+        TODO Mission 10 : afficher le formulaire de modification quand on clique sur « Modifier ».
+          Ajoute ici :
+          @if (editing()) {
+            <app-task-edit
+              [task]="task()!"
+              (saved)="onSaved($event)"
+              (cancelled)="editing.set(false)"
+            />
+          }
+          [task] donne la tâche au formulaire, (saved) et (cancelled) reçoivent ses messages.
+      -->
+
       <footer class="detail-card__footer">
+        <!--
+          TODO Mission 9 : ajoute ici, à côté du lien « Retour à la liste », deux boutons :
+            <button type="button" id="detail-toggle" class="btn-secondary" (click)="onToggle()">
+              {{ task()!.done ? 'Marquer comme active' : 'Marquer comme terminée' }}
+            </button>
+            <button type="button" id="detail-remove" class="btn-danger" (click)="onRemove()">
+              Supprimer
+            </button>
+          Les styles .btn-secondary et .btn-danger sont à écrire dans task-detail.css.
+
+          TODO Mission 10 : ajoute aussi un bouton « Modifier » qui ouvre le formulaire :
+            <button type="button" id="detail-edit" class="btn-secondary" (click)="editing.set(true)">
+              Modifier
+            </button>
+            Bonus : cache ce bouton pendant que le formulaire est ouvert, avec @if (!editing()) { ... }
+        -->
         <a routerLink="/tasks" class="btn-primary">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
             <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>

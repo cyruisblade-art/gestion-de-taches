@@ -9,6 +9,8 @@ import { Task } from '../task.model';
   templateUrl: './task-item.html',
   styleUrl: './task-item.css',
 })
+// TODO Bonus B : ce composant n'a pas de tests. Crée le fichier task-item.spec.ts dans ce même dossier
+//   (le README, partie 6, Bonus B, donne le contenu de départ à copier).
 export class TaskItemComponent {
   task = input.required<Task>();
 

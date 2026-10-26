@@ -5,7 +5,7 @@
       <h1 class="page-title">Gestion de tâches</h1>
       <p class="page-subtitle">
         @if (remainingCount() === 0 && totalCount() > 0) {
-          🎉 Toutes les tâches sont terminées !
+          Toutes les tâches sont terminées !
         } @else {
           <strong>{{ remainingCount() }}</strong>
           {{ remainingCount() === 1 ? 'tâche restante' : 'tâches restantes' }}
@@ -33,6 +33,39 @@
 
   <!-- Formulaire d'ajout -->
   <app-task-form (created)="onCreated($event)" />
+
+  <!--
+    TODO Mission 7 : ajoute ici le champ de recherche.
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Rechercher une tâche…"
+        aria-label="Rechercher une tâche"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+      />
+      [value] affiche le texte du signal dans le champ.
+      (input) met à jour le signal à chaque lettre tapée.
+      Le style de la classe "search-input" est à écrire dans task-list.css.
+  -->
+
+  <!--
+    TODO Mission 6 : ajoute ici le bouton « Supprimer les tâches terminées ».
+      Il ne doit apparaître que s'il y a au moins une tâche terminée :
+      @if (doneCount() > 0) {
+        <button type="button" class="btn-remove-done" (click)="onRemoveDone()">
+          Supprimer les tâches terminées ({{ doneCount() }})
+        </button>
+      }
+      Le style de la classe "btn-remove-done" est à écrire dans task-list.css.
+  -->
+
+  <!--
+    TODO Bonus A : ajoute ici la liste déroulante de tri.
+      Inspire-toi du champ « Priorité » dans task-form/task-form.html :
+      un <select> avec [value]="sortBy()" et (change)="sortBy.set($any($event.target).value)",
+      et deux <option> : value="ajout" (Ordre d'ajout) et value="priorite" (Priorité).
+  -->
 
   <!-- Liste des tâches -->
   <div class="tasks-container" role="tabpanel" aria-live="polite">
