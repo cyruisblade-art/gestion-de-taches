@@ -136,6 +136,10 @@
   color: var(--color-primary);
 }
 
+/* TODO Mission 5 : les deux couleurs ci-dessous sont écrites « en dur ».
+   Une fois les variables créées dans src/styles.css, remplace :
+     #dcfce7  par  var(--color-success-bg)
+     #15803d  par  var(--color-success-text) */
 .status-badge--done {
   background: #dcfce7;
   color: #15803d;
@@ -179,6 +183,21 @@
   border-top: 1px solid var(--color-border);
   background: var(--color-surface-muted);
 }
+
+/* TODO Mission 9 : pour que les boutons du pied de carte soient alignés avec un espace entre eux,
+   ajoute dans .detail-card__footer juste au-dessus :
+     display: flex;
+     flex-wrap: wrap;   (les boutons passent à la ligne sur petit écran)
+     gap: 0.5rem;
+
+   Puis écris ici les styles des deux nouveaux boutons :
+   - .btn-secondary : bouton clair. Inspire-toi de .btn-primary plus bas, mais avec
+       background: var(--color-primary-ghost); color: var(--color-primary);
+       border: 1px solid var(--color-primary-light);
+   - .btn-danger : bouton de suppression, avec
+       background: var(--color-danger-ghost); color: var(--color-danger);
+       border: 1px solid var(--color-danger-light);
+   N'oublie pas font-family: inherit; et cursor: pointer; (un <button> ne les a pas par défaut). */
 
 /* --- Primary button --- */
 .btn-primary {

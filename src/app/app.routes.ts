@@ -12,7 +12,7 @@ export const routes: Routes = [
       import('./features/tasks/task-list/task-list').then(
         (m) => m.TaskListComponent
       ),
-    title: 'Liste des tâches — Gestion de tâches',
+    title: 'Liste des tâches - Gestion de tâches',
   },
   {
     path: 'tasks/:id',
@@ -20,7 +20,7 @@ export const routes: Routes = [
       import('./features/tasks/task-detail/task-detail').then(
         (m) => m.TaskDetailComponent
       ),
-    title: 'Détail de la tâche — Gestion de tâches',
+    title: 'Détail de la tâche - Gestion de tâches',
   },
   {
     path: '**',

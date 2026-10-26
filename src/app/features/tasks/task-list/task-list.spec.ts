@@ -11,6 +11,7 @@ describe('TaskListComponent', () => {
   let taskService: TaskService;
 
   beforeEach(async () => {
+    // TODO Mission 8 : ajoute ici  localStorage.clear();  (même raison que dans task.spec.ts)
     await TestBed.configureTestingModule({
       imports: [TaskListComponent],
       providers: [provideRouter(routes)],
@@ -94,4 +95,18 @@ describe('TaskListComponent', () => {
       expect(component.remainingCount()).toBe(before - 1);
     });
   });
+
+  // TODO Mission 7 : ajoute ici un bloc de tests pour la recherche, sur le modèle du bloc « Filtres » :
+  //   describe('Recherche', () => {
+  //     it('ne doit afficher que les taches dont le titre contient le texte', () => {
+  //       component.search.set('git');
+  //       // vérifie que chaque tâche de component.filteredTasks() contient 'git' (en minuscules) dans son titre
+  //     });
+  //     it('ne doit pas tenir compte des majuscules', () => {
+  //       // component.search.set('GIT') doit donner le même résultat que 'git'
+  //     });
+  //     it('une recherche vide doit afficher toutes les taches', () => {
+  //       // component.search.set('') puis comparer avec taskService.tasks().length
+  //     });
+  //   });
 });

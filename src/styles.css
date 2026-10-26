@@ -1,38 +1,43 @@
 /* =========================================================
-   Design System — Gestion de tâches
+   Design System - Gestion de tâches
    ========================================================= */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* --- CSS Custom Properties (Design Tokens) --- */
 :root {
-  /* Colors — Primary (Blue) */
+  /* Colors - Primary (Blue) */
   --color-primary: #3b82f6;
   --color-primary-dark: #2563eb;
   --color-primary-light: #bfdbfe;
   --color-primary-ghost: #eff6ff;
   --color-primary-ring: rgba(59, 130, 246, 0.25);
 
-  /* Colors — Surface & Background */
+  /* Colors - Surface & Background */
   --color-bg: #f8fafc;
   --color-surface: #ffffff;
   --color-surface-muted: #f8fafc;
   --color-surface-hover: #f1f5f9;
 
-  /* Colors — Borders */
+  /* Colors - Borders */
   --color-border: #e2e8f0;
   --color-border-strong: #94a3b8;
 
-  /* Colors — Text */
+  /* Colors - Text */
   --color-text: #0f172a;
   --color-text-secondary: #334155;
   --color-text-muted: #64748b;
 
-  /* Colors — Danger */
+  /* Colors - Danger */
   --color-danger: #ef4444;
   --color-danger-light: #fecaca;
   --color-danger-ghost: #fef2f2;
   --color-danger-ring: rgba(239, 68, 68, 0.2);
+
+  /* TODO Mission 5 : ajoute ici les couleurs « succès » (vert), utilisées par le badge « Terminée » :
+       --color-success-bg: #dcfce7;
+       --color-success-text: #15803d;
+     Ensuite, va les utiliser dans task-detail/task-detail.css. */
 
   /* Priority colors */
   --priority-low-bg: #f0fdf4;

@@ -22,6 +22,19 @@
         <span class="task-card__status">
           {{ task().done ? 'Terminée' : 'Active' }}
         </span>
+        <!--
+          TODO Bonus C : affiche ici la date limite, seulement si la tâche en a une :
+            @if (task().dueDate) {
+              <span class="task-card__due" [class.task-card__due--late]="isLate()">
+                À faire avant le {{ task().dueDate }}
+              </span>
+            }
+          isLate() est à créer dans task-item.ts : elle renvoie true si la date est passée
+          et que la tâche n'est pas terminée. Comparer deux textes 'AAAA-MM-JJ' fonctionne :
+            const today = new Date().toISOString().slice(0, 10); // la date du jour en 'AAAA-MM-JJ'
+            return !this.task().done && !!this.task().dueDate && this.task().dueDate! < today;
+          La classe .task-card__due--late (texte rouge : var(--color-danger)) est à écrire dans task-item.css.
+        -->
       </div>
     </div>
   </div>
