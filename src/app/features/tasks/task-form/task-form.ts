@@ -1,7 +1,8 @@
 import { Component, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
-import { Task, ReminderDelay } from '../task.model';
+import { Task } from '../task.model';
+
 
 @Component({
   selector: 'app-task-form',
@@ -16,7 +17,6 @@ export class TaskFormComponent {
     priority: Task['priority'];
     dueDate?: string;
     dueTime?: string;
-    reminder?: ReminderDelay;
     tags?: string[];
   }>();
 
@@ -24,7 +24,8 @@ export class TaskFormComponent {
   priority = signal<Task['priority']>('normale');
   dueDate  = signal('');
   dueTime  = signal('');
-  reminder = signal<ReminderDelay | ''>('');
+
+
   selectedTags = signal<string[]>([]);
   customTagInput = signal('');
 
@@ -35,13 +36,6 @@ export class TaskFormComponent {
 
   readonly defaultTags: string[] = ['Angular', 'Travail', 'Études', 'Personnel', 'Urgent'];
 
-  readonly reminderOptions: { value: ReminderDelay; label: string }[] = [
-    { value: '5min',  label: '5 minutes avant' },
-    { value: '15min', label: '15 minutes avant' },
-    { value: '30min', label: '30 minutes avant' },
-    { value: '1h',    label: '1 heure avant' },
-    { value: '1day',  label: '1 jour avant' },
-  ];
 
   toggleTag(tag: string): void {
     const current = this.selectedTags();
@@ -83,7 +77,6 @@ export class TaskFormComponent {
       priority: Task['priority'];
       dueDate?: string;
       dueTime?: string;
-      reminder?: ReminderDelay;
       tags?: string[];
     } = {
       title: trimmed,
@@ -91,8 +84,8 @@ export class TaskFormComponent {
     };
     if (this.dueDate()) payload.dueDate = this.dueDate();
     if (this.dueTime()) payload.dueTime = this.dueTime();
-    if (this.reminder()) payload.reminder = this.reminder() as ReminderDelay;
     if (this.selectedTags().length > 0) payload.tags = this.selectedTags();
+
 
     this.created.emit(payload);
     this.reset();
@@ -103,7 +96,6 @@ export class TaskFormComponent {
     this.priority.set('normale');
     this.dueDate.set('');
     this.dueTime.set('');
-    this.reminder.set('');
     this.selectedTags.set([]);
     this.customTagInput.set('');
     this.errorMessage.set('');

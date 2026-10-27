@@ -83,16 +83,15 @@ describe('TaskListComponent', () => {
       expect(spy).toHaveBeenCalledWith('Tache test', 'normale');
     });
 
-    it('onCreated doit appeler taskService.add avec date, heure et rappel si fournis', () => {
+    it('onCreated doit appeler taskService.add avec date et heure si fournis', () => {
       const spy = vi.spyOn(taskService, 'add');
       component.onCreated({
         title: 'Tache urgente',
         priority: 'haute',
         dueDate: '2026-10-28',
         dueTime: '16:00',
-        reminder: '1h',
       });
-      expect(spy).toHaveBeenCalledWith('Tache urgente', 'haute', '2026-10-28', '16:00', '1h');
+      expect(spy).toHaveBeenCalledWith('Tache urgente', 'haute', '2026-10-28', '16:00');
     });
 
     it('onCreated doit appeler taskService.add avec tags si fournis', () => {
@@ -102,7 +101,7 @@ describe('TaskListComponent', () => {
         priority: 'basse',
         tags: ['Angular', 'Travail'],
       });
-      expect(spy).toHaveBeenCalledWith('Tache avec tag', 'basse', undefined, undefined, undefined, ['Angular', 'Travail']);
+      expect(spy).toHaveBeenCalledWith('Tache avec tag', 'basse', undefined, undefined, ['Angular', 'Travail']);
     });
   });
 

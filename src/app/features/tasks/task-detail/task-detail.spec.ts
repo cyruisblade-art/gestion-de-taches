@@ -16,10 +16,7 @@ function createActivatedRouteStub(id: string) {
 describe('TaskDetailComponent', () => {
   let fixture: ComponentFixture<TaskDetailComponent>;
   let component: TaskDetailComponent;
-
-  // TODO Mission 8 : ajoute avant les tests :
-  //   beforeEach(() => localStorage.clear());
-  //   (même raison que dans task.spec.ts)
+  beforeEach(() => localStorage.clear());
 
   // TODO Mission 9 : à la fin de ce fichier, ajoute les tests des nouveaux boutons :
   //   - cliquer sur « Marquer comme terminée » change component.task()?.done

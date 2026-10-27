@@ -1,5 +1,6 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { Task, ReminderDelay, SubTask, TaskLink } from './task.model';
+import { Task, SubTask, TaskLink } from './task.model';
+
 
 @Injectable({
   providedIn: 'root',
@@ -13,7 +14,7 @@ export class TaskService {
       priority: 'haute',
       dueDate: '2026-10-30',
       dueTime: '18:00',
-      reminder: '1h',
+
       description: `### Objectifs principaux\n- Mettre en place l'architecture Angular moderne\n- Assurer un design accessible et responsive\n\n**Ressources utiles :**\n- [Guide Angular](https://angular.dev)\n- [Design Tokens](https://m3.material.io)`,
       notes: 'Valider le choix des polices et des icônes SVG avec le client.',
       subTasks: [
@@ -49,7 +50,7 @@ export class TaskService {
       priority: 'haute',
       dueDate: '2026-10-28',
       dueTime: '16:00',
-      reminder: '1h',
+
       description: 'Tester les services, formulaires, et la décomposition en sous-tâches avec Vitest.',
       subTasks: [
         { id: 'st-7', title: 'Tests unitaires de TaskService', done: true },
@@ -94,13 +95,11 @@ export class TaskService {
     return Array.from(new Set([...this.defaultTags, ...fromTasks]));
   });
 
-  /** Ajoute une nouvelle tâche avec date, heure, rappel et tags facultatifs */
   add(
     title: string,
     priority: Task['priority'],
     dueDate?: string,
     dueTime?: string,
-    reminder?: ReminderDelay,
     tags?: string[]
   ): void {
     const trimmed = title.trim();
@@ -113,7 +112,7 @@ export class TaskService {
       priority,
       dueDate: dueDate || undefined,
       dueTime: dueTime || undefined,
-      reminder: reminder || undefined,
+
       subTasks: [],
       links: [],
       tags: tags && tags.length > 0 ? [...tags] : [],
@@ -149,10 +148,32 @@ export class TaskService {
     );
   }
 
-  /** Inverse l'état done d'une tâche */
+  /** Inverse l'état done d'une tâche et synchronise son statut Kanban */
   toggle(id: number): void {
     this._tasks.update((tasks) =>
-      tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t))
+      tasks.map((t) => {
+        if (t.id !== id) return t;
+        const newDone = !t.done;
+        return {
+          ...t,
+          done: newDone,
+          status: newDone ? 'done' : 'todo',
+        };
+      })
+    );
+  }
+
+  /** Modifie le statut Kanban d'une tâche */
+  updateStatus(id: number, status: 'todo' | 'in_progress' | 'done'): void {
+    this._tasks.update((tasks) =>
+      tasks.map((t) => {
+        if (t.id !== id) return t;
+        return {
+          ...t,
+          status,
+          done: status === 'done',
+        };
+      })
     );
   }
 
@@ -166,21 +187,20 @@ export class TaskService {
     this._tasks.update((tasks) => tasks.filter((t) => !t.done));
   }
 
-  /** Modifie les champs d'une tâche (titre, priorité, date, heure, rappel) */
+  /** Modifie les champs d'une tâche (titre, priorité, date, heure) */
   update(
     id: number,
     title: string,
     priority: Task['priority'],
     dueDate?: string,
-    dueTime?: string,
-    reminder?: ReminderDelay
+    dueTime?: string
   ): void {
     const trimmed = title.trim();
     if (trimmed.length < 3) return;
     this._tasks.update((tasks) =>
       tasks.map((t) =>
         t.id === id
-          ? { ...t, title: trimmed, priority, dueDate, dueTime, reminder }
+          ? { ...t, title: trimmed, priority, dueDate, dueTime }
           : t
       )
     );

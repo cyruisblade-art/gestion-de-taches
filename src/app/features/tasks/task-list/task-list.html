@@ -1,4 +1,4 @@
-<section class="task-list-page" aria-label="Liste des tâches">
+<section class="task-list-page" aria-label="Gestion des tâches">
   <!-- En-tête -->
   <header class="page-header">
     <div class="page-header__text">
@@ -14,8 +14,8 @@
       </p>
     </div>
 
-    <!-- Filtres -->
-    <nav class="filters" role="tablist" aria-label="Filtres des tâches">
+    <!-- Filtres d'état -->
+    <nav class="filters" role="tablist" aria-label="Filtres d'état des tâches">
       @for (f of filters; track f) {
         <button
           role="tab"
@@ -33,39 +33,6 @@
 
   <!-- Formulaire d'ajout -->
   <app-task-form (created)="onCreated($event)" />
-
-  <!--
-    TODO Mission 7 : ajoute ici le champ de recherche.
-      <input
-        type="search"
-        class="search-input"
-        placeholder="Rechercher une tâche…"
-        aria-label="Rechercher une tâche"
-        [value]="search()"
-        (input)="search.set($any($event.target).value)"
-      />
-      [value] affiche le texte du signal dans le champ.
-      (input) met à jour le signal à chaque lettre tapée.
-      Le style de la classe "search-input" est à écrire dans task-list.css.
-  -->
-
-  <!--
-    TODO Mission 6 : ajoute ici le bouton « Supprimer les tâches terminées ».
-      Il ne doit apparaître que s'il y a au moins une tâche terminée :
-      @if (doneCount() > 0) {
-        <button type="button" class="btn-remove-done" (click)="onRemoveDone()">
-          Supprimer les tâches terminées ({{ doneCount() }})
-        </button>
-      }
-      Le style de la classe "btn-remove-done" est à écrire dans task-list.css.
-  -->
-
-  <!--
-    TODO Bonus A : ajoute ici la liste déroulante de tri.
-      Inspire-toi du champ « Priorité » dans task-form/task-form.html :
-      un <select> avec [value]="sortBy()" et (change)="sortBy.set($any($event.target).value)",
-      et deux <option> : value="ajout" (Ordre d'ajout) et value="priorite" (Priorité).
-  -->
 
   <!-- Barre de filtrage par étiquettes / tags -->
   @if (allAvailableTags().length > 0) {
@@ -99,38 +66,327 @@
     </div>
   }
 
-  <!-- Liste des tâches -->
-  <div class="tasks-container" role="tabpanel" aria-live="polite">
-    @if (filteredTasks().length === 0) {
-      <div class="empty-state" role="status">
-        @if (tasks().length === 0) {
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16" class="empty-state__icon" aria-hidden="true">
-            <path d="M5 0h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2 2 2 0 0 1-2 2H3a2 2 0 0 1-2-2h1a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1H1a2 2 0 0 1 2-2h1V2a2 2 0 0 1 2-2m1 2v4h3V2z"/>
-            <path d="M1 6h4a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1m1 1v2h1V7zm2 0v2h1V7zm-3 3v-1H1v1zm3 0v-1H4v1z"/>
-          </svg>
-          <p class="empty-state__text">Aucune tâche pour le moment.</p>
-          <p class="empty-state__hint">Commencez par ajouter une tâche ci-dessus.</p>
-        } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16" class="empty-state__icon" aria-hidden="true">
-            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
-            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-          </svg>
+  <!-- BARRE DE SÉLECTION DES VUES (NOTION STYLE) -->
+  <div class="views-nav-bar" role="tablist" aria-label="Modes de vue">
+    <div class="views-nav-tabs">
+      @for (v of views; track v.mode) {
+        <button
+          type="button"
+          role="tab"
+          class="view-nav-btn"
+          [class.view-nav-btn--active]="activeView() === v.mode"
+          [attr.aria-selected]="activeView() === v.mode"
+          (click)="setView(v.mode)"
+        >
+          @if (v.mode === 'liste') {
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+            </svg>
+          } @else if (v.mode === 'kanban') {
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v11A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5zM2.5 2a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-11a.5.5 0 0 0-.5-.5zM9 2.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v7a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 9.5zM10.5 2a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.5-.5z"/>
+            </svg>
+          } @else if (v.mode === 'calendrier') {
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+            </svg>
+          } @else if (v.mode === 'tableau') {
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M0 2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2zm15 2h-4v3h4zm0 4h-4v3h4zm0 4h-4v3h3a1 1 0 0 0 1-1zm-5 3v-3H6v3zm-5 0v-3H1v2a1 1 0 0 0 1 1zm-4-4h4V8H1zm0-4h4V4H1zm5-3v3h4V4zm4 4H6v3h4z"/>
+            </svg>
+          }
+          {{ v.label }}
+        </button>
+      }
+    </div>
+
+    <span class="views-total-count">{{ filteredTasks().length }} tâche{{ filteredTasks().length > 1 ? 's' : '' }}</span>
+  </div>
+
+  <!-- ========================================================
+       1. VUE LISTE (Standard)
+       ======================================================== -->
+  @if (activeView() === 'liste') {
+    <div class="tasks-container" role="tabpanel" aria-live="polite">
+      @if (filteredTasks().length === 0) {
+        <div class="empty-state" role="status">
           <p class="empty-state__text">Aucune tâche pour ce filtre.</p>
-          <p class="empty-state__hint">Essayez un autre filtre ou ajoutez de nouvelles tâches.</p>
+          <p class="empty-state__hint">Essayez un autre filtre ou ajoutez une nouvelle tâche.</p>
+        </div>
+      } @else {
+        <ul class="tasks-list" aria-label="Liste des tâches">
+          @for (task of filteredTasks(); track task.id) {
+            <li>
+              <app-task-item
+                [task]="task"
+                (toggled)="onToggled($event)"
+                (removed)="onRemoved($event)"
+              />
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+  <!-- ========================================================
+       2. VUE TABLEAU KANBAN (Notion Kanban Board)
+       ======================================================== -->
+  @if (activeView() === 'kanban') {
+    <div class="kanban-board" role="region" aria-label="Tableau Kanban">
+      @for (col of kanbanColumns; track col.id) {
+        <div
+          class="kanban-column"
+          [attr.data-column]="col.id"
+          (dragover)="onDragOver($event)"
+          (drop)="onDrop(col.id)"
+        >
+          <div class="kanban-column__header">
+            <div class="kanban-column__title">
+              <span class="kanban-status-dot" [attr.data-status]="col.id"></span>
+              <h3>{{ col.label }}</h3>
+            </div>
+            <span class="kanban-count-pill">{{ getKanbanTasks(col.id).length }}</span>
+          </div>
+
+          <div class="kanban-cards-list">
+            @for (task of getKanbanTasks(col.id); track task.id) {
+              <div
+                class="kanban-card"
+                [class.kanban-card--done]="task.done"
+                draggable="true"
+                (dragstart)="onDragStart(task.id)"
+              >
+                <!-- Entête de carte -->
+                <div class="kanban-card__header">
+                  <span class="priority-badge" [class]="'priority-badge--' + task.priority">
+                    {{ task.priority }}
+                  </span>
+
+                  <!-- Sélecteur rapide de statut -->
+                  <div class="kanban-status-select-wrap">
+                    <select
+                      class="kanban-status-select"
+                      [value]="col.id"
+                      (change)="onStatusChange(task.id, $any($event.target).value)"
+                      aria-label="Changer de colonne"
+                    >
+                      @for (c of kanbanColumns; track c.id) {
+                        <option [value]="c.id">{{ c.label }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Titre -->
+                <a [routerLink]="['/tasks', task.id]" class="kanban-card__title">
+                  {{ task.title }}
+                </a>
+
+                <!-- Échéance & Sous-tâches -->
+                <div class="kanban-card__meta">
+                  @if (task.dueDate) {
+                    <span class="kanban-meta-item">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+                      </svg>
+                      {{ task.dueDate }}
+                    </span>
+                  }
+
+                  @if (task.subTasks && task.subTasks.length > 0) {
+                    <span class="kanban-meta-item">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
+                        <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.757.757 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
+                      </svg>
+                      {{ subTasksProgress(task).done }}/{{ subTasksProgress(task).total }}
+                    </span>
+                  }
+                </div>
+
+                <!-- Tags -->
+                @if (task.tags && task.tags.length > 0) {
+                  <div class="kanban-card__tags">
+                    @for (tag of task.tags; track tag) {
+                      <span class="kanban-tag" [attr.data-tag]="tag">#{{ tag }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            } @empty {
+              <div class="kanban-empty-col">
+                Glissez une tâche ici
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ========================================================
+       3. VUE CALENDRIER (Notion Calendar Grid)
+       ======================================================== -->
+  @if (activeView() === 'calendrier') {
+    <div class="calendar-view" role="region" aria-label="Vue Calendrier">
+      <!-- En-tête de navigation du calendrier -->
+      <div class="calendar-header">
+        <h2 class="calendar-month-title">{{ calendarMonthLabel() }}</h2>
+        <div class="calendar-nav-actions">
+          <button type="button" class="btn btn--secondary btn--sm" (click)="todayMonth()">
+            Aujourd'hui
+          </button>
+          <button type="button" class="btn btn--secondary btn--sm" (click)="prevMonth()" aria-label="Mois précédent">
+            ←
+          </button>
+          <button type="button" class="btn btn--secondary btn--sm" (click)="nextMonth()" aria-label="Mois suivant">
+            →
+          </button>
+        </div>
+      </div>
+
+      <!-- Jours de la semaine -->
+      <div class="calendar-weekdays">
+        @for (day of weekDays; track day) {
+          <div class="calendar-weekday">{{ day }}</div>
         }
       </div>
-    } @else {
-      <ul class="tasks-list" aria-label="Liste des tâches">
-        @for (task of filteredTasks(); track task.id) {
-          <li>
-            <app-task-item
-              [task]="task"
-              (toggled)="onToggled($event)"
-              (removed)="onRemoved($event)"
-            />
-          </li>
+
+      <!-- Grille des jours -->
+      <div class="calendar-grid">
+        @for (item of calendarGrid(); track item.dateString) {
+          <div
+            class="calendar-cell"
+            [class.calendar-cell--other-month]="!item.isCurrentMonth"
+            [class.calendar-cell--today]="item.isToday"
+          >
+            <div class="calendar-cell__header">
+              <span class="calendar-day-number">{{ item.dayNumber }}</span>
+              @if (item.isToday) {
+                <span class="calendar-today-badge">Auj.</span>
+              }
+            </div>
+
+            <div class="calendar-cell__tasks">
+              @for (task of item.tasks; track task.id) {
+                <a
+                  [routerLink]="['/tasks', task.id]"
+                  class="calendar-task-pill"
+                  [class.calendar-task-pill--done]="task.done"
+                  [class]="'priority-border--' + task.priority"
+                  [title]="task.title + (task.dueTime ? ' à ' + task.dueTime : '')"
+                >
+                  <span class="calendar-task-title">{{ task.title }}</span>
+                  @if (task.dueTime) {
+                    <span class="calendar-task-time">{{ task.dueTime }}</span>
+                  }
+                </a>
+              }
+            </div>
+          </div>
         }
-      </ul>
-    }
-  </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================
+       4. VUE TABLEAU (Notion Table View)
+       ======================================================== -->
+  @if (activeView() === 'tableau') {
+    <div class="table-view-container" role="region" aria-label="Vue Tableau">
+      <table class="notion-table">
+        <thead>
+          <tr>
+            <th class="col-checkbox">Fait</th>
+            <th class="col-title">Titre</th>
+            <th class="col-status">Statut</th>
+            <th class="col-priority">Priorité</th>
+            <th class="col-due">Échéance</th>
+            <th class="col-tags">Étiquettes</th>
+            <th class="col-subtasks">Sous-tâches</th>
+            <th class="col-actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (task of filteredTasks(); track task.id) {
+            <tr [class.table-row--done]="task.done">
+              <td class="col-checkbox">
+                <input
+                  type="checkbox"
+                  [checked]="task.done"
+                  (change)="onToggled(task.id)"
+                  [attr.aria-label]="'Marquer ' + task.title + ' comme ' + (task.done ? 'active' : 'terminée')"
+                />
+              </td>
+              <td class="col-title">
+                <a [routerLink]="['/tasks', task.id]" class="table-title-link">
+                  {{ task.title }}
+                </a>
+              </td>
+              <td class="col-status">
+                <select
+                  class="table-select-status"
+                  [value]="task.status || (task.done ? 'done' : 'todo')"
+                  (change)="onStatusChange(task.id, $any($event.target).value)"
+                >
+                  <option value="todo">À faire</option>
+                  <option value="in_progress">En cours</option>
+                  <option value="done">Terminé</option>
+                </select>
+              </td>
+              <td class="col-priority">
+                <span class="priority-badge" [class]="'priority-badge--' + task.priority">
+                  {{ task.priority }}
+                </span>
+              </td>
+              <td class="col-due">
+                @if (task.dueDate) {
+                  <span class="table-due-text">
+                    {{ task.dueDate }}{{ task.dueTime ? ' à ' + task.dueTime : '' }}
+                  </span>
+                } @else {
+                  <span class="table-muted-text">-</span>
+                }
+              </td>
+              <td class="col-tags">
+                <div class="table-tags-wrap">
+                  @for (tag of task.tags; track tag) {
+                    <span class="table-tag-chip" [attr.data-tag]="tag">#{{ tag }}</span>
+                  } @empty {
+                    <span class="table-muted-text">-</span>
+                  }
+                </div>
+              </td>
+              <td class="col-subtasks">
+                @if (task.subTasks && task.subTasks.length > 0) {
+                  <span class="table-subtasks-pill">
+                    {{ subTasksProgress(task).done }}/{{ subTasksProgress(task).total }} ({{ subTasksProgress(task).percentage }}%)
+                  </span>
+                } @else {
+                  <span class="table-muted-text">-</span>
+                }
+              </td>
+              <td class="col-actions">
+                <div class="table-actions-cell">
+                  <a [routerLink]="['/tasks', task.id]" class="btn-table-action" title="Voir le détail">
+                    Détail
+                  </a>
+                  <button type="button" class="btn-table-action btn-table-action--danger" (click)="onRemoved(task.id)" title="Supprimer">
+                    ×
+                  </button>
+                </div>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="table-empty-cell">
+                Aucune tâche ne correspond au filtre actif.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 </section>

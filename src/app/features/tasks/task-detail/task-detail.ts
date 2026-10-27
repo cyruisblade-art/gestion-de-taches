@@ -146,67 +146,90 @@ export class TaskDetailComponent {
 
   insertFormat(type: 'bold' | 'italic' | 'list' | 'task' | 'link' | 'heading'): void {
     const textarea = document.getElementById('description-textarea') as HTMLTextAreaElement | null;
+
     if (!textarea) {
-      // Fallback: append at end
-      const current = this.descriptionInput();
+      // Fallback sans accès DOM : on ajoute à la fin
       const snippets: Record<string, string> = {
-        bold: '**Texte en gras**',
-        italic: '*Texte en italique*',
+        bold: '\n**Texte en gras**',
+        italic: '\n*Texte en italique*',
         list: '\n- Élément de liste',
         task: '\n- [ ] Action à réaliser',
-        link: '[Titre du lien](https://exemple.com)',
+        link: '\n[Titre du lien](https://exemple.com)',
         heading: '\n### Nouveau titre',
       };
-      this.descriptionInput.set(current ? `${current}\n${snippets[type]}` : snippets[type]);
+      this.descriptionInput.set(this.descriptionInput() + (snippets[type] ?? ''));
       return;
     }
 
-    const start = textarea.selectionStart ?? 0;
-    const end = textarea.selectionEnd ?? 0;
-    const selected = textarea.value.slice(start, end);
+    const start  = textarea.selectionStart ?? 0;
+    const end    = textarea.selectionEnd   ?? 0;
+    const sel    = textarea.value.slice(start, end);
     const before = textarea.value.slice(0, start);
-    const after = textarea.value.slice(end);
+    const after  = textarea.value.slice(end);
 
-    let insertion = '';
-    let cursorOffset = 0;
+    let snippet: string;
+    let cursorAfter: number;
+
+    // S'assurer d'aller à la ligne si nécessaire pour les éléments de bloc ou si collé
+    const needsLeadingNewline = before.length > 0 && !before.endsWith('\n');
 
     switch (type) {
-      case 'bold':
-        insertion = selected ? `**${selected}**` : '**Texte en gras**';
-        cursorOffset = selected ? insertion.length : 2; // place cursor inside **|**
+      case 'bold': {
+        const prefix = (before.length > 0 && !/[\s\n]$/.test(before)) ? ' ' : '';
+        snippet     = sel ? `${prefix}**${sel}**` : `${prefix}**Texte en gras**`;
+        cursorAfter = sel ? start + snippet.length : start + prefix.length + 2;
         break;
-      case 'italic':
-        insertion = selected ? `*${selected}*` : '*Texte en italique*';
-        cursorOffset = selected ? insertion.length : 1;
+      }
+      case 'italic': {
+        const prefix = (before.length > 0 && !/[\s\n]$/.test(before)) ? ' ' : '';
+        snippet     = sel ? `${prefix}*${sel}*` : `${prefix}*Texte en italique*`;
+        cursorAfter = sel ? start + snippet.length : start + prefix.length + 1;
         break;
-      case 'heading':
-        insertion = `\n### ${selected || 'Nouveau titre'}`;
-        cursorOffset = insertion.length;
+      }
+      case 'heading': {
+        const nl = needsLeadingNewline ? '\n' : '';
+        snippet     = `${nl}### ${sel || 'Nouveau titre'}\n`;
+        cursorAfter = start + snippet.length;
         break;
-      case 'list':
-        insertion = `\n- ${selected || 'Élément de liste'}`;
-        cursorOffset = insertion.length;
+      }
+      case 'list': {
+        const nl = needsLeadingNewline ? '\n' : '';
+        snippet     = `${nl}- ${sel || 'Élément de liste'}\n`;
+        cursorAfter = start + snippet.length;
         break;
-      case 'task':
-        insertion = `\n- [ ] ${selected || 'Action à réaliser'}`;
-        cursorOffset = insertion.length;
+      }
+      case 'task': {
+        const nl = needsLeadingNewline ? '\n' : '';
+        snippet     = `${nl}- [ ] ${sel || 'Action à réaliser'}\n`;
+        cursorAfter = start + snippet.length;
         break;
-      case 'link':
-        insertion = selected ? `[${selected}](https://exemple.com)` : '[Titre du lien](https://exemple.com)';
-        cursorOffset = insertion.length;
+      }
+      case 'link': {
+        // Un lien sur sa propre ligne si précédé d'un saut de ligne ou d'une liste
+        const nl = needsLeadingNewline ? '\n' : (before.length > 0 && !/[\s\n]$/.test(before) ? ' ' : '');
+        snippet     = sel ? `${nl}[${sel}](https://exemple.com)` : `${nl}[Titre du lien](https://exemple.com)`;
+        cursorAfter = start + snippet.length;
         break;
+      }
+      default:
+        return;
     }
 
-    const newValue = before + insertion + after;
+    const newValue = before + snippet + after;
+
+    // Met à jour le signal → Angular planifie la détection de changements (microtâche zone.js)
     this.descriptionInput.set(newValue);
 
-    // Repositionne le curseur après le rendu Angular
-    requestAnimationFrame(() => {
-      textarea.focus();
-      const newCursor = start + cursorOffset;
-      textarea.setSelectionRange(newCursor, newCursor);
-    });
+    // setTimeout(fn, 0) s'exécute APRÈS la microtâche Angular (CD + [value] reset),
+    // ce qui garantit que le curseur est positionné en dernier.
+    setTimeout(() => {
+      if (document.body.contains(textarea)) {
+        textarea.focus();
+        textarea.setSelectionRange(cursorAfter, cursorAfter);
+      }
+    }, 0);
   }
+
 
 
   /**

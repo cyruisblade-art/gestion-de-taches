@@ -15,7 +15,6 @@ describe('TaskItemComponent', () => {
     priority: 'haute',
     dueDate: '2026-10-28',
     dueTime: '16:00',
-    reminder: '1h',
   };
 
   beforeEach(async () => {
@@ -43,9 +42,6 @@ describe('TaskItemComponent', () => {
     expect(component.formattedDue()).toContain('16:00');
   });
 
-  it('devrait formater le libelle de rappel avec reminderLabel()', () => {
-    expect(component.reminderLabel()).toBe('Rappel 1 h');
-  });
 
   it('devrait emettre toggled avec l id de la tache', () => {
     const spy = vi.spyOn(component.toggled, 'emit');
