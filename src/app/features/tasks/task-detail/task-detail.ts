@@ -1,13 +1,51 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import {
+  LucideAlertCircle,
+  LucideArrowLeft,
+  LucideCalendar,
+  LucideCheck,
+  LucideCheckSquare,
+  LucideCircle,
+  LucideEdit,
+  LucideExternalLink,
+  LucideFileText,
+  LucideLink,
+  LucideListTodo,
+  LucidePencil,
+  LucidePlus,
+  LucideStickyNote,
+  LucideTag,
+  LucideTrash2,
+  LucideX,
+} from '@lucide/angular';
 import { TaskService } from '../task';
 import { Task } from '../task.model';
 
 @Component({
   selector: 'app-task-detail',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [
+    RouterLink,
+    FormsModule,
+    LucideArrowLeft,
+    LucideAlertCircle,
+    LucideCheck,
+    LucideCircle,
+    LucidePencil,
+    LucideCalendar,
+    LucideTag,
+    LucideListTodo,
+    LucidePlus,
+    LucideFileText,
+    LucideEdit,
+    LucideStickyNote,
+    LucideLink,
+    LucideExternalLink,
+    LucideTrash2,
+    LucideX,
+  ],
   templateUrl: './task-detail.html',
   styleUrl: './task-detail.css',
 })

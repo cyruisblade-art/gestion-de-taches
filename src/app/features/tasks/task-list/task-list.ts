@@ -8,6 +8,15 @@ import { TaskItemComponent } from '../task-item/task-item';
 import { Task } from '../task.model';
 
 
+import {
+  LucideCalendar,
+  LucideCheckSquare,
+  LucideColumns,
+  LucideList,
+  LucideTable,
+  LucideTag,
+} from '@lucide/angular';
+
 export type FilterType = 'toutes' | 'actives' | 'terminées';
 export type ViewMode = 'liste' | 'kanban' | 'calendrier' | 'tableau';
 
@@ -23,7 +32,19 @@ export interface CalendarDay {
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [TaskFormComponent, TaskItemComponent, TitleCasePipe, RouterLink, FormsModule],
+  imports: [
+    TaskFormComponent,
+    TaskItemComponent,
+    TitleCasePipe,
+    RouterLink,
+    FormsModule,
+    LucideTag,
+    LucideList,
+    LucideColumns,
+    LucideCalendar,
+    LucideTable,
+    LucideCheckSquare,
+  ],
   templateUrl: './task-list.html',
   styleUrl: './task-list.css',
 })
