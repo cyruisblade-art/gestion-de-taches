@@ -1,47 +1,32 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { TaskService } from '../task';
 import { Task } from '../task.model';
 
 @Component({
   selector: 'app-task-detail',
   standalone: true,
-  // TODO Mission 10 : ajoute TaskEditComponent dans cette liste (et son import en haut du fichier :
-  //   import { TaskEditComponent } from '../task-edit/task-edit';)
-  //   Sans ça, la balise <app-task-edit> ne sera pas reconnue dans task-detail.html.
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './task-detail.html',
   styleUrl: './task-detail.css',
 })
-export class TaskDetailComponent implements OnInit {
+export class TaskDetailComponent {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private taskService = inject(TaskService);
 
-  // TODO Mission 9 : remplacer la « copie » de la tâche par un calcul automatique.
-  //   Le problème : ngOnInit() (plus bas) cherche la tâche UNE seule fois et la copie dans ce signal.
-  //   Si on coche la tâche ensuite, la copie ne change pas et l'écran ne se met pas à jour.
-  //
-  //   Étape 1 : lis l'id dans l'adresse (une seule fois suffit, il ne change pas) :
-  //     private taskId = Number(this.route.snapshot.paramMap.get('id'));
-  //     (Number('abc') donne NaN, Number('2') donne 2)
-  //
-  //   Étape 2 : remplace la ligne « task = signal... » ci-dessous par un computed :
-  //     task = computed<Task | null>(() => {
-  //       if (isNaN(this.taskId)) return null;
-  //       return this.taskService.getById(this.taskId) ?? null;
-  //     });
-  //     Comme getById() lit la liste du service (un signal), ce computed se recalcule tout seul.
-  //
-  //   Étape 3 : supprime toute la fonction ngOnInit(), « implements OnInit » dans la ligne de la classe,
-  //     et OnInit / signal dans l'import tout en haut (s'ils ne servent plus).
-  //
-  //   Étape 4 : dans task-detail.html, supprime le bloc « Chargement… » (task() ne vaut plus jamais undefined).
-  //
-  //   Lance npm test : les tests existants de task-detail.spec.ts doivent toujours passer.
-  task = signal<Task | null | undefined>(undefined);
+  private taskId = computed(() => {
+    const idParam = this.route.snapshot.paramMap.get('id');
+    return idParam ? parseInt(idParam, 10) : NaN;
+  });
 
-  // TODO Mission 10 : crée ici le signal qui dit si le formulaire de modification est ouvert :
-  //   editing = signal(false);
+  /** Signal calculé automatique liant la tâche au service */
+  task = computed<Task | null>(() => {
+    const id = this.taskId();
+    if (isNaN(id)) return null;
+    return this.taskService.getById(id) ?? null;
+  });
 
   readonly priorityLabel: Record<Task['priority'], string> = {
     basse: 'Basse',
@@ -49,9 +34,189 @@ export class TaskDetailComponent implements OnInit {
     haute: 'Haute',
   };
 
+  readonly priorities: Task['priority'][] = ['basse', 'normale', 'haute'];
+
+  // --- Édition du titre ---
+  editingTitle = signal(false);
+  titleInput = signal('');
+
+  startEditingTitle(): void {
+    const t = this.task();
+    if (!t) return;
+    this.titleInput.set(t.title);
+    this.editingTitle.set(true);
+  }
+
+  saveTitle(): void {
+    const t = this.task();
+    if (!t) return;
+    const trimmed = this.titleInput().trim();
+    if (trimmed.length >= 3) {
+      this.taskService.updateTaskFields(t.id, { title: trimmed });
+    }
+    this.editingTitle.set(false);
+  }
+
+  cancelEditingTitle(): void {
+    this.editingTitle.set(false);
+  }
+
+  onPriorityChange(priority: Task['priority']): void {
+    const t = this.task();
+    if (!t) return;
+    this.taskService.updateTaskFields(t.id, { priority });
+  }
+
+  // --- Sous-tâches & Progression ---
+  newSubTaskTitle = signal('');
+
+  subTasksProgress = computed(() => {
+    const t = this.task();
+    if (!t) return { total: 0, done: 0, percentage: 0 };
+    return this.taskService.getSubTasksProgress(t);
+  });
+
+  onAddSubTask(): void {
+    const t = this.task();
+    const title = this.newSubTaskTitle().trim();
+    if (!t || !title) return;
+    this.taskService.addSubTask(t.id, title);
+    this.newSubTaskTitle.set('');
+  }
+
+  onToggleSubTask(subTaskId: string): void {
+    const t = this.task();
+    if (!t) return;
+    this.taskService.toggleSubTask(t.id, subTaskId);
+  }
+
+  onRemoveSubTask(subTaskId: string): void {
+    const t = this.task();
+    if (!t) return;
+    this.taskService.removeSubTask(t.id, subTaskId);
+  }
+
+  // --- Description en texte enrichi / Markdown ---
+  editingDescription = signal(false);
+  descriptionInput = signal('');
+
+  startEditingDescription(): void {
+    const t = this.task();
+    this.descriptionInput.set(t?.description || '');
+    this.editingDescription.set(true);
+  }
+
+  saveDescription(): void {
+    const t = this.task();
+    if (!t) return;
+    this.taskService.updateTaskFields(t.id, { description: this.descriptionInput().trim() });
+    this.editingDescription.set(false);
+  }
+
+  cancelEditingDescription(): void {
+    this.editingDescription.set(false);
+  }
+
+  insertFormat(type: 'bold' | 'italic' | 'list' | 'task' | 'link' | 'heading'): void {
+    const current = this.descriptionInput();
+    const formats: Record<string, string> = {
+      bold: '**Texte en gras**',
+      italic: '*Texte en italique*',
+      list: '\n- Élément de liste',
+      task: '\n- [ ] Action à réaliser',
+      link: '[Titre du lien](https://exemple.com)',
+      heading: '\n### Nouveau titre',
+    };
+    this.descriptionInput.set(current ? `${current} ${formats[type]}` : formats[type]);
+  }
+
   /**
-   * Retourne le libellé formaté de l'échéance
+   * Convertit une syntaxe markdown légère en HTML sécurisé
    */
+  renderMarkdown(text?: string): string {
+    if (!text) return '<p class="detail-empty-text">Aucune description détaillée renseignée. Cliquez sur Modifier pour en ajouter une.</p>';
+
+    // Escape basic html
+    let escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Headings
+    escaped = escaped.replace(/^### (.*$)/gim, '<h4 class="md-h4">$1</h4>');
+    escaped = escaped.replace(/^## (.*$)/gim, '<h3 class="md-h3">$1</h3>');
+    escaped = escaped.replace(/^# (.*$)/gim, '<h2 class="md-h2">$1</h2>');
+
+    // Bold and italic
+    escaped = escaped.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+    escaped = escaped.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+
+    // Links [label](url)
+    escaped = escaped.replace(/\[(.*?)\]\((https?:\/\/.*?)\)/gim, '<a href="$2" target="_blank" rel="noopener noreferrer" class="md-link">$1</a>');
+
+    // Task list items
+    escaped = escaped.replace(/^- \[x\] (.*$)/gim, '<div class="md-task-item md-task-item--done"><span class="md-checkbox md-checkbox--checked">✓</span> <span class="md-task-label">$1</span></div>');
+    escaped = escaped.replace(/^- \[ \] (.*$)/gim, '<div class="md-task-item"><span class="md-checkbox">○</span> <span class="md-task-label">$1</span></div>');
+
+    // Regular list items
+    escaped = escaped.replace(/^- (.*$)/gim, '<div class="md-bullet-item"><span class="md-bullet">•</span> <span>$1</span></div>');
+
+    // Line breaks
+    escaped = escaped.replace(/\n/gim, '<br/>');
+
+    return escaped;
+  }
+
+  // --- Notes ---
+  notesInput = signal('');
+  notesSaved = signal(false);
+
+  saveNotes(): void {
+    const t = this.task();
+    if (!t) return;
+    this.taskService.updateTaskFields(t.id, { notes: this.notesInput() });
+    this.notesSaved.set(true);
+    setTimeout(() => this.notesSaved.set(false), 2000);
+  }
+
+  // --- Liens ---
+  newLinkUrl = signal('');
+  newLinkLabel = signal('');
+  showAddLinkForm = signal(false);
+
+  onAddLink(): void {
+    const t = this.task();
+    const url = this.newLinkUrl().trim();
+    if (!t || !url) return;
+    this.taskService.addLink(t.id, url, this.newLinkLabel().trim());
+    this.newLinkUrl.set('');
+    this.newLinkLabel.set('');
+    this.showAddLinkForm.set(false);
+  }
+
+  onRemoveLink(linkId: string): void {
+    const t = this.task();
+    if (!t) return;
+    this.taskService.removeLink(t.id, linkId);
+  }
+
+  // --- Actions globales ---
+  onToggle(): void {
+    const t = this.task();
+    if (t) {
+      this.taskService.toggle(t.id);
+    }
+  }
+
+  onRemove(): void {
+    const t = this.task();
+    if (!t) return;
+    if (window.confirm('Voulez-vous vraiment supprimer cette tâche ?')) {
+      this.taskService.remove(t.id);
+      this.router.navigate(['/tasks']);
+    }
+  }
+
   formattedDueDate(): string {
     const t = this.task();
     if (!t?.dueDate) return 'Aucune';
@@ -71,9 +236,6 @@ export class TaskDetailComponent implements OnInit {
     return t.dueTime ? `${t.dueDate} à ${t.dueTime}` : t.dueDate;
   }
 
-  /**
-   * Retourne true si l'échéance est passée
-   */
   isLate(): boolean {
     const t = this.task();
     if (!t || t.done || !t.dueDate) return false;
@@ -81,9 +243,6 @@ export class TaskDetailComponent implements OnInit {
     return new Date(dueStr) < new Date();
   }
 
-  /**
-   * Libellé lisible du rappel
-   */
   reminderLabel(): string {
     const t = this.task();
     if (!t?.reminder) return 'Aucun';
@@ -96,38 +255,4 @@ export class TaskDetailComponent implements OnInit {
     };
     return map[t.reminder] ?? t.reminder;
   }
-
-  ngOnInit(): void {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    const id = idParam ? parseInt(idParam, 10) : NaN;
-
-    if (isNaN(id)) {
-      this.task.set(null);
-      return;
-    }
-
-    const found = this.taskService.getById(id);
-    this.task.set(found ?? null);
-  }
-
-  // TODO Mission 9 : crée ici les deux fonctions appelées par les nouveaux boutons.
-  //
-  //   onToggle(): void {
-  //     // appelle this.taskService.toggle(...) avec l'id de la tâche affichée : this.task()!.id
-  //   }
-  //
-  //   onRemove(): void {
-  //     // 1. demande confirmation avec window.confirm(...) (comme en mission 4)
-  //     // 2. si OK : appelle this.taskService.remove(...)
-  //     // 3. puis reviens à la liste : this.router.navigate(['/tasks']);
-  //   }
-  //
-  //   Pour this.router : importe Router depuis '@angular/router' (à côté de ActivatedRoute)
-  //   et ajoute en haut de la classe :  private router = inject(Router);
-
-  // TODO Mission 10 : crée ici la fonction appelée quand on clique sur « Enregistrer » dans <app-task-edit> :
-  //   onSaved(data: { title: string; priority: Task['priority'] }): void {
-  //     this.taskService.update(this.task()!.id, data.title, data.priority);
-  //     this.editing.set(false); // referme le formulaire
-  //   }
 }

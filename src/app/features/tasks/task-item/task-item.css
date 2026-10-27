@@ -144,6 +144,34 @@
   border-radius: var(--radius-sm);
 }
 
+.task-card__subtasks {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-hover);
+  padding: 0.125rem 0.45rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.subtask-mini-bar {
+  width: 28px;
+  height: 4px;
+  background: var(--color-border);
+  border-radius: 999px;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.subtask-mini-bar__fill {
+  display: block;
+  height: 100%;
+  background: var(--color-primary);
+  transition: width 0.3s ease;
+}
+
 /* --- Priority badges --- */
 .priority-badge {
   display: inline-flex;

@@ -85,4 +85,19 @@ export class TaskItemComponent {
     };
     return map[r] ?? r;
   }
+
+  /**
+   * Retourne la progression des sous-tâches
+   */
+  subTasksProgress(): { total: number; done: number; percentage: number } {
+    const subTasks = this.task().subTasks || [];
+    const total = subTasks.length;
+    if (total === 0) return { total: 0, done: 0, percentage: 0 };
+    const done = subTasks.filter((s) => s.done).length;
+    return {
+      total,
+      done,
+      percentage: Math.round((done / total) * 100),
+    };
+  }
 }

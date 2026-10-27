@@ -1,5 +1,17 @@
 export type ReminderDelay = '5min' | '15min' | '30min' | '1h' | '1day';
 
+export interface SubTask {
+  id: string;
+  title: string;
+  done: boolean;
+}
+
+export interface TaskLink {
+  id: string;
+  url: string;
+  label?: string;
+}
+
 export interface Task {
   id: number;
   title: string;
@@ -11,4 +23,16 @@ export interface Task {
   dueTime?: string;
   /** Délai de rappel avant l'échéance */
   reminder?: ReminderDelay;
+  /** Description en texte enrichi / Markdown */
+  description?: string;
+  /** Notes libres */
+  notes?: string;
+  /** Liste des sous-tâches avec progression */
+  subTasks?: SubTask[];
+  /** Liens web associés */
+  links?: TaskLink[];
+  /** Étiquettes / Tags personnalisés (ex. 'Angular', 'Travail') */
+  tags?: string[];
+  /** Statut pour vue Kanban */
+  status?: 'todo' | 'in_progress' | 'done';
 }

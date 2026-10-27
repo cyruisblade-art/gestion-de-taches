@@ -89,4 +89,46 @@ describe('TaskDetailComponent', () => {
     const hasBackLink = compiled.textContent?.includes('Retour');
     expect(hasBackLink).toBe(true);
   });
+
+  it('devrait modifier le titre de la tache', async () => {
+    const tempService = TestBed.inject(TaskService);
+    const task = tempService.tasks()[0];
+    await createComponent(String(task.id));
+
+    component.startEditingTitle();
+    expect(component.editingTitle()).toBe(true);
+
+    component.titleInput.set('Nouveau Titre Complet');
+    component.saveTitle();
+    expect(component.editingTitle()).toBe(false);
+    expect(component.task()?.title).toBe('Nouveau Titre Complet');
+  });
+
+  it('devrait ajouter et basculer une sous-tache', async () => {
+    const tempService = TestBed.inject(TaskService);
+    const task = tempService.tasks()[0];
+    await createComponent(String(task.id));
+
+    const initialSubTasksCount = component.task()?.subTasks?.length || 0;
+    component.newSubTaskTitle.set('Nouvelle sous-tache de test');
+    component.onAddSubTask();
+
+    expect(component.task()?.subTasks?.length).toBe(initialSubTasksCount + 1);
+    const added = component.task()?.subTasks?.find((s) => s.title === 'Nouvelle sous-tache de test');
+    expect(added).toBeDefined();
+
+    component.onToggleSubTask(added!.id);
+    const toggled = component.task()?.subTasks?.find((s) => s.id === added!.id);
+    expect(toggled?.done).toBe(true);
+  });
+
+  it('devrait inverser l etat done de la tache avec onToggle()', async () => {
+    const tempService = TestBed.inject(TaskService);
+    const task = tempService.tasks()[0];
+    await createComponent(String(task.id));
+    const initialDone = component.task()?.done;
+
+    component.onToggle();
+    expect(component.task()?.done).toBe(!initialDone);
+  });
 });

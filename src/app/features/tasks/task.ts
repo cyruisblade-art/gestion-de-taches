@@ -1,15 +1,73 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { Task, ReminderDelay } from './task.model';
+import { Task, ReminderDelay, SubTask, TaskLink } from './task.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskService {
   private _tasks = signal<Task[]>([
-    { id: 1, title: 'Lire la documentation Angular', done: false, priority: 'haute' },
-    { id: 2, title: 'Configurer le projet Git', done: true, priority: 'normale' },
-    { id: 3, title: 'Écrire les tests unitaires', done: false, priority: 'haute', dueDate: '2026-10-28', dueTime: '16:00', reminder: '1h' },
-    { id: 4, title: 'Réviser les composants', done: false, priority: 'basse' },
+    {
+      id: 1,
+      title: 'Créer le site vitrine',
+      done: false,
+      priority: 'haute',
+      dueDate: '2026-10-30',
+      dueTime: '18:00',
+      reminder: '1h',
+      description: `### Objectifs principaux\n- Mettre en place l'architecture Angular moderne\n- Assurer un design accessible et responsive\n\n**Ressources utiles :**\n- [Guide Angular](https://angular.dev)\n- [Design Tokens](https://m3.material.io)`,
+      notes: 'Valider le choix des polices et des icônes SVG avec le client.',
+      subTasks: [
+        { id: 'st-1', title: 'Maquette UI / UX', done: true },
+        { id: 'st-2', title: 'Développement des composants', done: false },
+        { id: 'st-3', title: 'Tests unitaires et E2E', done: false },
+        { id: 'st-4', title: 'Déploiement en production', done: false },
+      ],
+      links: [
+        { id: 'lnk-1', url: 'https://angular.dev', label: 'Documentation officielle Angular' },
+        { id: 'lnk-2', url: 'https://github.com', label: 'Dépôt GitHub du projet' },
+      ],
+      tags: ['Angular', 'Travail'],
+      status: 'in_progress',
+    },
+    {
+      id: 2,
+      title: 'Configurer le projet Git',
+      done: true,
+      priority: 'normale',
+      description: 'Initialiser le dépôt git, configurer les branches principales et les workflows GitHub Actions.',
+      subTasks: [
+        { id: 'st-5', title: 'Initialiser git init', done: true },
+        { id: 'st-6', title: 'Créer le README et le .gitignore', done: true },
+      ],
+      tags: ['Personnel'],
+      status: 'done',
+    },
+    {
+      id: 3,
+      title: 'Écrire les tests unitaires',
+      done: false,
+      priority: 'haute',
+      dueDate: '2026-10-28',
+      dueTime: '16:00',
+      reminder: '1h',
+      description: 'Tester les services, formulaires, et la décomposition en sous-tâches avec Vitest.',
+      subTasks: [
+        { id: 'st-7', title: 'Tests unitaires de TaskService', done: true },
+        { id: 'st-8', title: 'Tests unitaires de TaskItemComponent', done: true },
+        { id: 'st-9', title: 'Tests des sous-tâches et progression', done: false },
+      ],
+      tags: ['Angular', 'Urgent'],
+      status: 'todo',
+    },
+    {
+      id: 4,
+      title: 'Réviser les composants',
+      done: false,
+      priority: 'basse',
+      description: 'Revue de code générale et optimisation des performances de rendu.',
+      tags: ['Études'],
+      status: 'todo',
+    },
   ]);
 
   private _nextId = signal<number>(5);
@@ -46,6 +104,10 @@ export class TaskService {
       dueDate: dueDate || undefined,
       dueTime: dueTime || undefined,
       reminder: reminder || undefined,
+      subTasks: [],
+      links: [],
+      tags: [],
+      status: 'todo',
     };
 
     this._tasks.update((tasks) => [...tasks, newTask]);
@@ -69,7 +131,7 @@ export class TaskService {
     this._tasks.update((tasks) => tasks.filter((t) => !t.done));
   }
 
-  /** Modifie le titre, la priorité, la date, l'heure et le rappel d'une tâche */
+  /** Modifie les champs d'une tâche (titre, priorité, date, heure, rappel) */
   update(
     id: number,
     title: string,
@@ -89,6 +151,115 @@ export class TaskService {
     );
   }
 
+  /** Mise à jour générique et partielle des champs d'une tâche */
+  updateTaskFields(id: number, fields: Partial<Omit<Task, 'id'>>): void {
+    this._tasks.update((tasks) =>
+      tasks.map((t) => {
+        if (t.id !== id) return t;
+        const updated = { ...t, ...fields };
+        if (fields.title) {
+          const trimmed = fields.title.trim();
+          if (trimmed.length >= 3) {
+            updated.title = trimmed;
+          }
+        }
+        return updated;
+      })
+    );
+  }
+
+  // --- Gestion des sous-tâches ---
+
+  /** Ajoute une sous-tâche à une tâche */
+  addSubTask(taskId: number, title: string): void {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+
+    const newSubTask: SubTask = {
+      id: `st-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      title: trimmed,
+      done: false,
+    };
+
+    this._tasks.update((tasks) =>
+      tasks.map((t) => {
+        if (t.id !== taskId) return t;
+        const currentSubTasks = t.subTasks || [];
+        return { ...t, subTasks: [...currentSubTasks, newSubTask] };
+      })
+    );
+  }
+
+  /** Inverse l'état done d'une sous-tâche */
+  toggleSubTask(taskId: number, subTaskId: string): void {
+    this._tasks.update((tasks) =>
+      tasks.map((t) => {
+        if (t.id !== taskId) return t;
+        const subTasks = (t.subTasks || []).map((st) =>
+          st.id === subTaskId ? { ...st, done: !st.done } : st
+        );
+        return { ...t, subTasks };
+      })
+    );
+  }
+
+  /** Supprime une sous-tâche */
+  removeSubTask(taskId: number, subTaskId: string): void {
+    this._tasks.update((tasks) =>
+      tasks.map((t) => {
+        if (t.id !== taskId) return t;
+        const subTasks = (t.subTasks || []).filter((st) => st.id !== subTaskId);
+        return { ...t, subTasks };
+      })
+    );
+  }
+
+  /** Calcule la progression des sous-tâches (total, complétées, pourcentage) */
+  getSubTasksProgress(task: Task): { total: number; done: number; percentage: number } {
+    const subTasks = task.subTasks || [];
+    const total = subTasks.length;
+    if (total === 0) return { total: 0, done: 0, percentage: 0 };
+    const done = subTasks.filter((st) => st.done).length;
+    const percentage = Math.round((done / total) * 100);
+    return { total, done, percentage };
+  }
+
+  // --- Gestion des liens ---
+
+  /** Ajoute un lien web à la tâche */
+  addLink(taskId: number, url: string, label?: string): void {
+    let trimmedUrl = url.trim();
+    if (!trimmedUrl) return;
+    if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+      trimmedUrl = `https://${trimmedUrl}`;
+    }
+
+    const newLink: TaskLink = {
+      id: `lnk-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      url: trimmedUrl,
+      label: label?.trim() || trimmedUrl,
+    };
+
+    this._tasks.update((tasks) =>
+      tasks.map((t) => {
+        if (t.id !== taskId) return t;
+        const currentLinks = t.links || [];
+        return { ...t, links: [...currentLinks, newLink] };
+      })
+    );
+  }
+
+  /** Supprime un lien associé */
+  removeLink(taskId: number, linkId: string): void {
+    this._tasks.update((tasks) =>
+      tasks.map((t) => {
+        if (t.id !== taskId) return t;
+        const links = (t.links || []).filter((l) => l.id !== linkId);
+        return { ...t, links };
+      })
+    );
+  }
+
   /**
    * Retourne true si la date+heure d'échéance est déjà passée
    * (la tâche est en retard)
@@ -97,7 +268,7 @@ export class TaskService {
     if (!task.dueDate) return false;
     const dateStr = task.dueTime
       ? `${task.dueDate}T${task.dueTime}`
-      : task.dueDate;
+      : `${task.dueDate}T23:59:59`;
     return new Date(dateStr) < new Date();
   }
 
