@@ -59,6 +59,21 @@ describe('TaskListComponent', () => {
       fixture.detectChanges();
       expect(component.filteredTasks().length).toBe(taskService.tasks().length);
     });
+
+    it('le filtre par tag ne doit afficher que les taches contenant ce tag', () => {
+      component.setTagFilter('Angular');
+      fixture.detectChanges();
+      const filtered = component.filteredTasks();
+      expect(filtered.length).toBeGreaterThan(0);
+      expect(filtered.every((t) => t.tags?.includes('Angular'))).toBe(true);
+    });
+
+    it('cliquer une deuxieme fois sur un tag reinitialise le filtre', () => {
+      component.setTagFilter('Angular');
+      expect(component.activeTagFilter()).toBe('Angular');
+      component.setTagFilter('Angular');
+      expect(component.activeTagFilter()).toBeNull();
+    });
   });
 
   describe('Ajout de tache', () => {
@@ -78,6 +93,16 @@ describe('TaskListComponent', () => {
         reminder: '1h',
       });
       expect(spy).toHaveBeenCalledWith('Tache urgente', 'haute', '2026-10-28', '16:00', '1h');
+    });
+
+    it('onCreated doit appeler taskService.add avec tags si fournis', () => {
+      const spy = vi.spyOn(taskService, 'add');
+      component.onCreated({
+        title: 'Tache avec tag',
+        priority: 'basse',
+        tags: ['Angular', 'Travail'],
+      });
+      expect(spy).toHaveBeenCalledWith('Tache avec tag', 'basse', undefined, undefined, undefined, ['Angular', 'Travail']);
     });
   });
 

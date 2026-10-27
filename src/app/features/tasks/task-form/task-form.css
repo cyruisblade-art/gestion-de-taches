@@ -83,6 +83,102 @@
   margin-top: 0.375rem;
 }
 
+/* --- Tags Selector --- */
+.tags-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-bottom: 0.5rem;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: var(--color-surface-hover);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+  font-family: inherit;
+  transition: all 0.15s ease;
+}
+
+.tag-chip:hover {
+  border-color: var(--color-primary-light);
+  background: var(--color-primary-ghost);
+  color: var(--color-primary);
+}
+
+.tag-chip--selected {
+  background: var(--color-primary-ghost);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.tag-chip[data-tag='Angular'].tag-chip--selected {
+  background: #fff1f2;
+  color: #e11d48;
+  border-color: #f43f5e;
+}
+
+.tag-chip[data-tag='Travail'].tag-chip--selected {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #3b82f6;
+}
+
+.tag-chip[data-tag='Études'].tag-chip--selected {
+  background: #faf5ff;
+  color: #7e22ce;
+  border-color: #a855f7;
+}
+
+.tag-chip[data-tag='Personnel'].tag-chip--selected {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #22c55e;
+}
+
+.tag-chip[data-tag='Urgent'].tag-chip--selected {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #ef4444;
+}
+
+.custom-tag-row {
+  display: flex;
+  gap: 0.375rem;
+  align-items: center;
+}
+
+.form-input--sm {
+  padding: 0.375rem 0.625rem;
+  font-size: 0.8125rem;
+  flex: 1;
+}
+
+.btn--sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.btn--sm:hover:not(:disabled) {
+  background: var(--color-primary-ghost);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
 .btn-submit {
   width: 100%;
   display: flex;

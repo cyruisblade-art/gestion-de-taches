@@ -17,6 +17,7 @@ export class TaskFormComponent {
     dueDate?: string;
     dueTime?: string;
     reminder?: ReminderDelay;
+    tags?: string[];
   }>();
 
   title    = signal('');
@@ -24,11 +25,15 @@ export class TaskFormComponent {
   dueDate  = signal('');
   dueTime  = signal('');
   reminder = signal<ReminderDelay | ''>('');
+  selectedTags = signal<string[]>([]);
+  customTagInput = signal('');
 
   errorMessage = signal('');
   submitted    = signal(false);
 
   readonly priorities: Task['priority'][] = ['basse', 'normale', 'haute'];
+
+  readonly defaultTags: string[] = ['Angular', 'Travail', 'Études', 'Personnel', 'Urgent'];
 
   readonly reminderOptions: { value: ReminderDelay; label: string }[] = [
     { value: '5min',  label: '5 minutes avant' },
@@ -37,6 +42,28 @@ export class TaskFormComponent {
     { value: '1h',    label: '1 heure avant' },
     { value: '1day',  label: '1 jour avant' },
   ];
+
+  toggleTag(tag: string): void {
+    const current = this.selectedTags();
+    if (current.includes(tag)) {
+      this.selectedTags.set(current.filter((t) => t !== tag));
+    } else {
+      this.selectedTags.set([...current, tag]);
+    }
+  }
+
+  isTagSelected(tag: string): boolean {
+    return this.selectedTags().includes(tag);
+  }
+
+  addCustomTag(): void {
+    const trimmed = this.customTagInput().trim();
+    if (!trimmed) return;
+    if (!this.selectedTags().includes(trimmed)) {
+      this.selectedTags.set([...this.selectedTags(), trimmed]);
+    }
+    this.customTagInput.set('');
+  }
 
   onSubmit(): void {
     this.submitted.set(true);
@@ -57,6 +84,7 @@ export class TaskFormComponent {
       dueDate?: string;
       dueTime?: string;
       reminder?: ReminderDelay;
+      tags?: string[];
     } = {
       title: trimmed,
       priority: this.priority(),
@@ -64,6 +92,7 @@ export class TaskFormComponent {
     if (this.dueDate()) payload.dueDate = this.dueDate();
     if (this.dueTime()) payload.dueTime = this.dueTime();
     if (this.reminder()) payload.reminder = this.reminder() as ReminderDelay;
+    if (this.selectedTags().length > 0) payload.tags = this.selectedTags();
 
     this.created.emit(payload);
     this.reset();
@@ -75,6 +104,8 @@ export class TaskFormComponent {
     this.dueDate.set('');
     this.dueTime.set('');
     this.reminder.set('');
+    this.selectedTags.set([]);
+    this.customTagInput.set('');
     this.errorMessage.set('');
     this.submitted.set(false);
   }

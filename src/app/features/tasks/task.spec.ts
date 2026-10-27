@@ -299,4 +299,31 @@ describe('TaskService', () => {
       expect(updated?.notes).toBe('Notes de reunion');
     });
   });
+
+  // -------------------------------------------------------
+  // Tags / Étiquettes
+  // -------------------------------------------------------
+  describe('Tags et etiquettes', () => {
+    it('devrait ajouter un tag a une tache avec addTag', () => {
+      const task = service.tasks()[0];
+      service.addTag(task.id, 'Frontend');
+      const updated = service.getById(task.id);
+      expect(updated?.tags).toContain('Frontend');
+    });
+
+    it('devrait supprimer un tag d une tache avec removeTag', () => {
+      const task = service.tasks()[0];
+      const tagToRemove = task.tags![0];
+      service.removeTag(task.id, tagToRemove);
+      const updated = service.getById(task.id);
+      expect(updated?.tags).not.toContain(tagToRemove);
+    });
+
+    it('devrait exposer allAvailableTags incluant les tags par defaut', () => {
+      const tags = service.allAvailableTags();
+      expect(tags).toContain('Angular');
+      expect(tags).toContain('Travail');
+      expect(tags).toContain('Urgent');
+    });
+  });
 });
