@@ -1,9 +1,14 @@
+export type ReminderDelay = '5min' | '15min' | '30min' | '1h' | '1day';
+
 export interface Task {
   id: number;
   title: string;
   done: boolean;
   priority: 'basse' | 'normale' | 'haute';
-  // TODO Bonus C : ajoute ici la date limite, facultative (le « ? » veut dire qu'elle peut être absente) :
-  //   dueDate?: string; // au format 'AAAA-MM-JJ', par exemple '2026-12-31'
-  //   Le format 'AAAA-MM-JJ' est celui que renvoie un <input type="date">.
+  /** Date limite au format 'AAAA-MM-JJ', ex. '2026-12-31' */
+  dueDate?: string;
+  /** Heure limite au format 'HH:MM', ex. '16:00' */
+  dueTime?: string;
+  /** Délai de rappel avant l'échéance */
+  reminder?: ReminderDelay;
 }

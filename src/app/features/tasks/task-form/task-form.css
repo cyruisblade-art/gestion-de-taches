@@ -6,6 +6,20 @@
   margin-bottom: 1.5rem;
 }
 
+/* Ligne avec deux champs côte à côte (date + heure) */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 .task-form__title {
   font-size: 1rem;
   font-weight: 600;

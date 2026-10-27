@@ -73,6 +73,21 @@ describe('TaskService', () => {
       const uniqueIds = new Set(ids);
       expect(uniqueIds.size).toBe(ids.length);
     });
+
+    it('devrait ajouter une tache avec date limite, heure et rappel', () => {
+      service.add('Finir les tests unitaires', 'haute', '2026-10-28', '16:00', '1h');
+      const added = service.tasks()[service.tasks().length - 1];
+      expect(added.dueDate).toBe('2026-10-28');
+      expect(added.dueTime).toBe('16:00');
+      expect(added.reminder).toBe('1h');
+    });
+
+    it('devrait detecter si une tache est en retard avec isLate()', () => {
+      const pastTask: Task = { id: 99, title: 'Tache passee', done: false, priority: 'normale', dueDate: '2020-01-01', dueTime: '10:00' };
+      const futureTask: Task = { id: 100, title: 'Tache future', done: false, priority: 'normale', dueDate: '2099-01-01', dueTime: '10:00' };
+      expect(service.isLate(pastTask)).toBe(true);
+      expect(service.isLate(futureTask)).toBe(false);
+    });
   });
 
   // -------------------------------------------------------

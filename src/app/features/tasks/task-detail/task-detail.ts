@@ -49,6 +49,54 @@ export class TaskDetailComponent implements OnInit {
     haute: 'Haute',
   };
 
+  /**
+   * Retourne le libellé formaté de l'échéance
+   */
+  formattedDueDate(): string {
+    const t = this.task();
+    if (!t?.dueDate) return 'Aucune';
+    const parts = t.dueDate.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const day = parseInt(parts[2], 10);
+      const d = new Date(year, month, day);
+      const dateFormatted = d.toLocaleDateString('fr-FR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      });
+      return t.dueTime ? `${dateFormatted} à ${t.dueTime}` : dateFormatted;
+    }
+    return t.dueTime ? `${t.dueDate} à ${t.dueTime}` : t.dueDate;
+  }
+
+  /**
+   * Retourne true si l'échéance est passée
+   */
+  isLate(): boolean {
+    const t = this.task();
+    if (!t || t.done || !t.dueDate) return false;
+    const dueStr = t.dueTime ? `${t.dueDate}T${t.dueTime}` : `${t.dueDate}T23:59:59`;
+    return new Date(dueStr) < new Date();
+  }
+
+  /**
+   * Libellé lisible du rappel
+   */
+  reminderLabel(): string {
+    const t = this.task();
+    if (!t?.reminder) return 'Aucun';
+    const map: Record<string, string> = {
+      '5min': '5 minutes avant',
+      '15min': '15 minutes avant',
+      '30min': '30 minutes avant',
+      '1h': '1 heure avant',
+      '1day': '1 jour avant',
+    };
+    return map[t.reminder] ?? t.reminder;
+  }
+
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? parseInt(idParam, 10) : NaN;

@@ -116,6 +116,34 @@
   color: var(--color-text-muted);
 }
 
+.task-card__due {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-hover);
+  padding: 0.125rem 0.4rem;
+  border-radius: var(--radius-sm);
+}
+
+.task-card__due--late {
+  color: var(--color-danger);
+  background: var(--color-danger-ghost);
+  font-weight: 600;
+}
+
+.task-card__reminder {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  background: var(--color-primary-ghost);
+  padding: 0.125rem 0.4rem;
+  border-radius: var(--radius-sm);
+}
+
 /* --- Priority badges --- */
 .priority-badge {
   display: inline-flex;

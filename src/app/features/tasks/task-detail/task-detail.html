@@ -66,11 +66,23 @@
             </span>
           </dd>
         </div>
-        <!--
-          TODO Bonus C : ajoute ici une ligne « Date limite », sur le modèle des lignes au-dessus
-          (un <div class="detail-info-row"> avec un <dt> et un <dd>).
-          Affiche task()!.dueDate, ou « Aucune » si la tâche n'a pas de date.
-        -->
+        <div class="detail-info-row">
+          <dt class="detail-info-label">Date limite</dt>
+          <dd class="detail-info-value">
+            <span [class.detail-due--late]="isLate()">
+              {{ formattedDueDate() }}
+            </span>
+            @if (isLate()) {
+              <span class="detail-late-tag">(en retard)</span>
+            }
+          </dd>
+        </div>
+        <div class="detail-info-row">
+          <dt class="detail-info-label">Rappel</dt>
+          <dd class="detail-info-value">
+            {{ reminderLabel() }}
+          </dd>
+        </div>
       </dl>
 
       <!--

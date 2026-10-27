@@ -67,6 +67,18 @@ describe('TaskListComponent', () => {
       component.onCreated({ title: 'Tache test', priority: 'normale' });
       expect(spy).toHaveBeenCalledWith('Tache test', 'normale');
     });
+
+    it('onCreated doit appeler taskService.add avec date, heure et rappel si fournis', () => {
+      const spy = vi.spyOn(taskService, 'add');
+      component.onCreated({
+        title: 'Tache urgente',
+        priority: 'haute',
+        dueDate: '2026-10-28',
+        dueTime: '16:00',
+        reminder: '1h',
+      });
+      expect(spy).toHaveBeenCalledWith('Tache urgente', 'haute', '2026-10-28', '16:00', '1h');
+    });
   });
 
   describe('Suppression de tache', () => {
