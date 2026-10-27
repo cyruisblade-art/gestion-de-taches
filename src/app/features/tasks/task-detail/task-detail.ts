@@ -145,17 +145,69 @@ export class TaskDetailComponent {
   }
 
   insertFormat(type: 'bold' | 'italic' | 'list' | 'task' | 'link' | 'heading'): void {
-    const current = this.descriptionInput();
-    const formats: Record<string, string> = {
-      bold: '**Texte en gras**',
-      italic: '*Texte en italique*',
-      list: '\n- Élément de liste',
-      task: '\n- [ ] Action à réaliser',
-      link: '[Titre du lien](https://exemple.com)',
-      heading: '\n### Nouveau titre',
-    };
-    this.descriptionInput.set(current ? `${current} ${formats[type]}` : formats[type]);
+    const textarea = document.getElementById('description-textarea') as HTMLTextAreaElement | null;
+    if (!textarea) {
+      // Fallback: append at end
+      const current = this.descriptionInput();
+      const snippets: Record<string, string> = {
+        bold: '**Texte en gras**',
+        italic: '*Texte en italique*',
+        list: '\n- Élément de liste',
+        task: '\n- [ ] Action à réaliser',
+        link: '[Titre du lien](https://exemple.com)',
+        heading: '\n### Nouveau titre',
+      };
+      this.descriptionInput.set(current ? `${current}\n${snippets[type]}` : snippets[type]);
+      return;
+    }
+
+    const start = textarea.selectionStart ?? 0;
+    const end = textarea.selectionEnd ?? 0;
+    const selected = textarea.value.slice(start, end);
+    const before = textarea.value.slice(0, start);
+    const after = textarea.value.slice(end);
+
+    let insertion = '';
+    let cursorOffset = 0;
+
+    switch (type) {
+      case 'bold':
+        insertion = selected ? `**${selected}**` : '**Texte en gras**';
+        cursorOffset = selected ? insertion.length : 2; // place cursor inside **|**
+        break;
+      case 'italic':
+        insertion = selected ? `*${selected}*` : '*Texte en italique*';
+        cursorOffset = selected ? insertion.length : 1;
+        break;
+      case 'heading':
+        insertion = `\n### ${selected || 'Nouveau titre'}`;
+        cursorOffset = insertion.length;
+        break;
+      case 'list':
+        insertion = `\n- ${selected || 'Élément de liste'}`;
+        cursorOffset = insertion.length;
+        break;
+      case 'task':
+        insertion = `\n- [ ] ${selected || 'Action à réaliser'}`;
+        cursorOffset = insertion.length;
+        break;
+      case 'link':
+        insertion = selected ? `[${selected}](https://exemple.com)` : '[Titre du lien](https://exemple.com)';
+        cursorOffset = insertion.length;
+        break;
+    }
+
+    const newValue = before + insertion + after;
+    this.descriptionInput.set(newValue);
+
+    // Repositionne le curseur après le rendu Angular
+    requestAnimationFrame(() => {
+      textarea.focus();
+      const newCursor = start + cursorOffset;
+      textarea.setSelectionRange(newCursor, newCursor);
+    });
   }
+
 
   /**
    * Convertit une syntaxe markdown légère en HTML sécurisé
@@ -270,16 +322,5 @@ export class TaskDetailComponent {
     return new Date(dueStr) < new Date();
   }
 
-  reminderLabel(): string {
-    const t = this.task();
-    if (!t?.reminder) return 'Aucun';
-    const map: Record<string, string> = {
-      '5min': '5 minutes avant',
-      '15min': '15 minutes avant',
-      '30min': '30 minutes avant',
-      '1h': '1 heure avant',
-      '1day': '1 jour avant',
-    };
-    return map[t.reminder] ?? t.reminder;
-  }
 }
+
