@@ -1,6 +1,7 @@
 <form class="task-form" (ngSubmit)="onSubmit()" novalidate aria-label="Formulaire d'ajout de tâche">
   <h2 class="task-form__title">Nouvelle tâche</h2>
 
+  <!-- Titre -->
   <div class="form-group" [class.form-group--error]="errorMessage()">
     <label for="task-title" class="form-label">
       Titre <span class="form-required" aria-hidden="true">*</span>
@@ -28,6 +29,7 @@
     }
   </div>
 
+  <!-- Priorité -->
   <div class="form-group">
     <label for="task-priority" class="form-label">Priorité</label>
     <select
@@ -42,19 +44,65 @@
     </select>
   </div>
 
-  <!--
-    TODO Bonus C : ajoute ici le champ de date limite, sur le modèle du bloc « Priorité » juste au-dessus :
-      <div class="form-group">
-        <label for="task-due-date" class="form-label">Date limite (facultative)</label>
-        <input
-          id="task-due-date"
-          type="date"
-          class="form-input"
-          [value]="dueDate()"
-          (input)="dueDate.set($any($event.target).value)"
-        />
-      </div>
-  -->
+  <!-- Date limite + Heure sur la même ligne -->
+  <div class="form-row">
+    <div class="form-group">
+      <label for="task-due-date" class="form-label">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
+        </svg>
+        Date limite
+      </label>
+      <input
+        id="task-due-date"
+        type="date"
+        class="form-input"
+        [value]="dueDate()"
+        (input)="dueDate.set($any($event.target).value)"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="task-due-time" class="form-label">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71z"/>
+          <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0"/>
+        </svg>
+        Heure
+      </label>
+      <input
+        id="task-due-time"
+        type="time"
+        class="form-input"
+        [value]="dueTime()"
+        (input)="dueTime.set($any($event.target).value)"
+        [disabled]="!dueDate()"
+      />
+    </div>
+  </div>
+
+  <!-- Rappel (seulement si une date est choisie) -->
+  @if (dueDate()) {
+    <div class="form-group">
+      <label for="task-reminder" class="form-label">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2M8 1.918l-.797.161A4 4 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4 4 0 0 0-3.203-3.92zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5 5 0 0 1 13 6c0 .88.32 4.2 1.22 6"/>
+        </svg>
+        Rappel
+      </label>
+      <select
+        id="task-reminder"
+        class="form-select"
+        [value]="reminder()"
+        (change)="reminder.set($any($event.target).value)"
+      >
+        <option value="">Pas de rappel</option>
+        @for (opt of reminderOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+  }
 
   <button type="submit" class="btn-submit" id="submit-task">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">

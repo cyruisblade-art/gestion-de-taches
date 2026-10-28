@@ -3,7 +3,7 @@ import { TitleCasePipe } from '@angular/common';
 import { TaskService } from '../task';
 import { TaskFormComponent } from '../task-form/task-form';
 import { TaskItemComponent } from '../task-item/task-item';
-import { Task } from '../task.model';
+import { Task, ReminderDelay } from '../task.model';
 
 type FilterType = 'toutes' | 'actives' | 'terminées';
 
@@ -58,8 +58,12 @@ export class TaskListComponent {
   //   readonly doneCount = computed(() => this.tasks().filter((t) => t.done).length);
   //   Il sert à n'afficher le bouton « Supprimer les tâches terminées » que s'il y en a au moins une.
 
-  onCreated(data: { title: string; priority: Task['priority'] }): void {
-    this.taskService.add(data.title, data.priority);
+  onCreated(data: { title: string; priority: Task['priority']; dueDate?: string; dueTime?: string; reminder?: ReminderDelay }): void {
+    if (data.dueDate || data.dueTime || data.reminder) {
+      this.taskService.add(data.title, data.priority, data.dueDate, data.dueTime, data.reminder);
+    } else {
+      this.taskService.add(data.title, data.priority);
+    }
   }
 
   onToggled(id: number): void {

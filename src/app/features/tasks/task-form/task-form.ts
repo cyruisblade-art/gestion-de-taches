@@ -1,7 +1,7 @@
 import { Component, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
-import { Task } from '../task.model';
+import { Task, ReminderDelay } from '../task.model';
 
 @Component({
   selector: 'app-task-form',
@@ -11,22 +11,32 @@ import { Task } from '../task.model';
   styleUrl: './task-form.css',
 })
 export class TaskFormComponent {
-  created = output<{ title: string; priority: Task['priority'] }>();
+  created = output<{
+    title: string;
+    priority: Task['priority'];
+    dueDate?: string;
+    dueTime?: string;
+    reminder?: ReminderDelay;
+  }>();
 
-  title = signal('');
+  title    = signal('');
   priority = signal<Task['priority']>('normale');
-  // TODO Bonus C : ajoute un signal pour la date limite :  dueDate = signal('');
-  //   Puis :
-  //   - ajoute dueDate dans le type de « created » ci-dessus : { title, priority, dueDate?: string }
-  //   - dans onSubmit(), envoie-la :  dueDate: this.dueDate() || undefined  (|| undefined : pas de date si le champ est vide)
-  //   - dans reset(), vide-la :  this.dueDate.set('');
-  //   - dans task-list.ts, onCreated() doit la passer à taskService.add(...)
-  //   Attention : le test « devrait emettre created avec un titre valide » de task-form.spec.ts
-  //   devra être adapté, car l'objet envoyé contiendra un champ de plus.
+  dueDate  = signal('');
+  dueTime  = signal('');
+  reminder = signal<ReminderDelay | ''>('');
+
   errorMessage = signal('');
-  submitted = signal(false);
+  submitted    = signal(false);
 
   readonly priorities: Task['priority'][] = ['basse', 'normale', 'haute'];
+
+  readonly reminderOptions: { value: ReminderDelay; label: string }[] = [
+    { value: '5min',  label: '5 minutes avant' },
+    { value: '15min', label: '15 minutes avant' },
+    { value: '30min', label: '30 minutes avant' },
+    { value: '1h',    label: '1 heure avant' },
+    { value: '1day',  label: '1 jour avant' },
+  ];
 
   onSubmit(): void {
     this.submitted.set(true);
@@ -41,13 +51,30 @@ export class TaskFormComponent {
       return;
     }
 
-    this.created.emit({ title: trimmed, priority: this.priority() });
+    const payload: {
+      title: string;
+      priority: Task['priority'];
+      dueDate?: string;
+      dueTime?: string;
+      reminder?: ReminderDelay;
+    } = {
+      title: trimmed,
+      priority: this.priority(),
+    };
+    if (this.dueDate()) payload.dueDate = this.dueDate();
+    if (this.dueTime()) payload.dueTime = this.dueTime();
+    if (this.reminder()) payload.reminder = this.reminder() as ReminderDelay;
+
+    this.created.emit(payload);
     this.reset();
   }
 
   private reset(): void {
     this.title.set('');
     this.priority.set('normale');
+    this.dueDate.set('');
+    this.dueTime.set('');
+    this.reminder.set('');
     this.errorMessage.set('');
     this.submitted.set(false);
   }

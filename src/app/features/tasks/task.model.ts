@@ -1,9 +1,38 @@
+export type ReminderDelay = '5min' | '15min' | '30min' | '1h' | '1day';
+
+export interface SubTask {
+  id: string;
+  title: string;
+  done: boolean;
+}
+
+export interface TaskLink {
+  id: string;
+  url: string;
+  label?: string;
+}
+
 export interface Task {
   id: number;
   title: string;
   done: boolean;
   priority: 'basse' | 'normale' | 'haute';
-  // TODO Bonus C : ajoute ici la date limite, facultative (le « ? » veut dire qu'elle peut être absente) :
-  //   dueDate?: string; // au format 'AAAA-MM-JJ', par exemple '2026-12-31'
-  //   Le format 'AAAA-MM-JJ' est celui que renvoie un <input type="date">.
+  /** Date limite au format 'AAAA-MM-JJ', ex. '2026-12-31' */
+  dueDate?: string;
+  /** Heure limite au format 'HH:MM', ex. '16:00' */
+  dueTime?: string;
+  /** Délai de rappel avant l'échéance */
+  reminder?: ReminderDelay;
+  /** Description en texte enrichi / Markdown */
+  description?: string;
+  /** Notes libres */
+  notes?: string;
+  /** Liste des sous-tâches avec progression */
+  subTasks?: SubTask[];
+  /** Liens web associés */
+  links?: TaskLink[];
+  /** Étiquettes / Tags personnalisés (ex. 'Angular', 'Travail') */
+  tags?: string[];
+  /** Statut pour vue Kanban */
+  status?: 'todo' | 'in_progress' | 'done';
 }
