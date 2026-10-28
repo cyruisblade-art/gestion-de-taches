@@ -53,6 +53,12 @@
             </span>
           </span>
         }
+
+        @for (tag of task().tags; track tag) {
+          <span class="task-card__tag" [attr.data-tag]="tag">
+            #{{ tag }}
+          </span>
+        }
       </div>
     </div>
   </div>

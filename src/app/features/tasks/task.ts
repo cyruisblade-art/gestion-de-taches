@@ -85,13 +85,23 @@ export class TaskService {
     return this._tasks().find((t) => t.id === id);
   }
 
-  /** Ajoute une nouvelle tâche avec date, heure et rappel facultatifs */
+  /** Liste des tags disponibles par défaut */
+  readonly defaultTags: string[] = ['Angular', 'Travail', 'Études', 'Personnel', 'Urgent'];
+
+  /** Signal calculé : liste de tous les tags existants (par défaut + créés par l'utilisateur) */
+  readonly allAvailableTags = computed(() => {
+    const fromTasks = this._tasks().flatMap((t) => t.tags || []);
+    return Array.from(new Set([...this.defaultTags, ...fromTasks]));
+  });
+
+  /** Ajoute une nouvelle tâche avec date, heure, rappel et tags facultatifs */
   add(
     title: string,
     priority: Task['priority'],
     dueDate?: string,
     dueTime?: string,
-    reminder?: ReminderDelay
+    reminder?: ReminderDelay,
+    tags?: string[]
   ): void {
     const trimmed = title.trim();
     if (trimmed.length < 3) return;
@@ -106,12 +116,37 @@ export class TaskService {
       reminder: reminder || undefined,
       subTasks: [],
       links: [],
-      tags: [],
+      tags: tags && tags.length > 0 ? [...tags] : [],
       status: 'todo',
     };
 
     this._tasks.update((tasks) => [...tasks, newTask]);
     this._nextId.update((id) => id + 1);
+  }
+
+  /** Ajoute un tag à une tâche */
+  addTag(taskId: number, tag: string): void {
+    const trimmed = tag.trim();
+    if (!trimmed) return;
+    this._tasks.update((tasks) =>
+      tasks.map((t) => {
+        if (t.id !== taskId) return t;
+        const currentTags = t.tags || [];
+        if (currentTags.includes(trimmed)) return t;
+        return { ...t, tags: [...currentTags, trimmed] };
+      })
+    );
+  }
+
+  /** Supprime un tag d'une tâche */
+  removeTag(taskId: number, tag: string): void {
+    this._tasks.update((tasks) =>
+      tasks.map((t) => {
+        if (t.id !== taskId) return t;
+        const currentTags = t.tags || [];
+        return { ...t, tags: currentTags.filter((tg) => tg !== tag) };
+      })
+    );
   }
 
   /** Inverse l'état done d'une tâche */

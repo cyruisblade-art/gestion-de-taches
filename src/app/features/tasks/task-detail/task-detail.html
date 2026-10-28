@@ -125,6 +125,72 @@
             </div>
           }
         </div>
+
+        <!-- Étiquettes / Tags de la tâche -->
+        <div class="detail-tags-bar">
+          <span class="detail-tags-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
+              <path d="M1.293 7.707A1 1 0 0 1 1 7.086V2a2 2 0 0 1 2-2h5.086a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0z"/>
+            </svg>
+            Tags :
+          </span>
+
+          <div class="detail-tags-list">
+            @for (tag of task()!.tags; track tag) {
+              <span class="detail-tag-chip" [attr.data-tag]="tag">
+                #{{ tag }}
+                <button
+                  type="button"
+                  class="detail-tag-remove"
+                  (click)="onRemoveTag(tag)"
+                  title="Retirer ce tag"
+                  aria-label="Retirer ce tag"
+                >
+                  ×
+                </button>
+              </span>
+            }
+
+            <div class="add-tag-dropdown-wrapper">
+              <button
+                type="button"
+                class="btn-add-tag"
+                (click)="showAddTagDropdown.set(!showAddTagDropdown())"
+              >
+                + Ajouter tag
+              </button>
+
+              @if (showAddTagDropdown()) {
+                <div class="add-tag-dropdown">
+                  <p class="dropdown-title">Sélectionner :</p>
+                  <div class="dropdown-tags">
+                    @for (t of allAvailableTags(); track t) {
+                      @if (!task()!.tags?.includes(t)) {
+                        <button type="button" class="dropdown-tag-option" (click)="onAddTag(t)">
+                          + {{ t }}
+                        </button>
+                      }
+                    }
+                  </div>
+                  <div class="dropdown-input-row">
+                    <input
+                      type="text"
+                      class="form-input form-input--sm"
+                      [value]="customTagInput()"
+                      (input)="customTagInput.set($any($event.target).value)"
+                      (keydown.enter)="$event.preventDefault(); onAddCustomTag()"
+                      placeholder="Nouveau tag..."
+                    />
+                    <button type="button" class="btn btn--primary btn--sm" (click)="onAddCustomTag()">
+                      OK
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
       </header>
 
       <!-- CORPS DE LA PAGE -->

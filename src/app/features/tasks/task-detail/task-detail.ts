@@ -67,6 +67,33 @@ export class TaskDetailComponent {
     this.taskService.updateTaskFields(t.id, { priority });
   }
 
+  // --- Gestion des étiquettes (Tags) ---
+  readonly allAvailableTags = this.taskService.allAvailableTags;
+  showAddTagDropdown = signal(false);
+  customTagInput = signal('');
+
+  onAddTag(tag: string): void {
+    const t = this.task();
+    if (!t) return;
+    this.taskService.addTag(t.id, tag);
+    this.showAddTagDropdown.set(false);
+  }
+
+  onRemoveTag(tag: string): void {
+    const t = this.task();
+    if (!t) return;
+    this.taskService.removeTag(t.id, tag);
+  }
+
+  onAddCustomTag(): void {
+    const t = this.task();
+    const tag = this.customTagInput().trim();
+    if (!t || !tag) return;
+    this.taskService.addTag(t.id, tag);
+    this.customTagInput.set('');
+    this.showAddTagDropdown.set(false);
+  }
+
   // --- Sous-tâches & Progression ---
   newSubTaskTitle = signal('');
 

@@ -24,42 +24,48 @@ export class TaskListComponent {
   readonly remainingCount = this.taskService.remainingCount;
 
   activeFilter = signal<FilterType>('toutes');
-
   readonly filters: FilterType[] = ['toutes', 'actives', 'terminées'];
 
-  // TODO Mission 7 : crée ici le signal qui contient le texte tapé dans le champ de recherche :
-  //   search = signal('');
+  /** Filtre actif par étiquette/tag */
+  activeTagFilter = signal<string | null>(null);
 
-  // TODO Bonus A : crée ici le signal du tri choisi :
-  //   sortBy = signal<SortType>('ajout');
+  /** Liste dynamique des tags disponibles */
+  readonly allAvailableTags = this.taskService.allAvailableTags;
 
   readonly filteredTasks = computed<Task[]>(() => {
     const filter = this.activeFilter();
-    const all = this.tasks();
-    if (filter === 'actives') return all.filter((t) => !t.done);
-    if (filter === 'terminées') return all.filter((t) => t.done);
-    return all;
-    // TODO Mission 7 : pour l'instant, chaque « if » renvoie directement son résultat (return).
-    //   Il faut d'abord filtrer, PUIS appliquer la recherche. Réorganise comme ceci :
-    //     1. let result = all;
-    //     2. if (filter === 'actives') result = all.filter((t) => !t.done);   (pareil pour 'terminées')
-    //     3. const text = this.search().trim().toLowerCase();
-    //     4. if (text) result = result.filter((t) => t.title.toLowerCase().includes(text));
-    //     5. return result;
-    //
-    // TODO Bonus A : avant le « return result; », si this.sortBy() vaut 'priorite', trie une copie :
-    //     const order = { haute: 0, normale: 1, basse: 2 };
-    //     result = [...result].sort((a, b) => order[a.priority] - order[b.priority]);
+    let result = this.tasks();
+    if (filter === 'actives') result = result.filter((t) => !t.done);
+    else if (filter === 'terminées') result = result.filter((t) => t.done);
+
+    const tag = this.activeTagFilter();
+    if (tag) {
+      result = result.filter((t) => t.tags && t.tags.includes(tag));
+    }
+    return result;
   });
+
+  setTagFilter(tag: string | null): void {
+    if (this.activeTagFilter() === tag) {
+      this.activeTagFilter.set(null);
+    } else {
+      this.activeTagFilter.set(tag);
+    }
+  }
 
   readonly totalCount = computed(() => this.tasks().length);
 
-  // TODO Mission 6 : crée ici le nombre de tâches terminées, sur le modèle de totalCount juste au-dessus :
-  //   readonly doneCount = computed(() => this.tasks().filter((t) => t.done).length);
-  //   Il sert à n'afficher le bouton « Supprimer les tâches terminées » que s'il y en a au moins une.
-
-  onCreated(data: { title: string; priority: Task['priority']; dueDate?: string; dueTime?: string; reminder?: ReminderDelay }): void {
-    if (data.dueDate || data.dueTime || data.reminder) {
+  onCreated(data: {
+    title: string;
+    priority: Task['priority'];
+    dueDate?: string;
+    dueTime?: string;
+    reminder?: ReminderDelay;
+    tags?: string[];
+  }): void {
+    if (data.tags && data.tags.length > 0) {
+      this.taskService.add(data.title, data.priority, data.dueDate, data.dueTime, data.reminder, data.tags);
+    } else if (data.dueDate || data.dueTime || data.reminder) {
       this.taskService.add(data.title, data.priority, data.dueDate, data.dueTime, data.reminder);
     } else {
       this.taskService.add(data.title, data.priority);

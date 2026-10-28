@@ -131,4 +131,16 @@ describe('TaskDetailComponent', () => {
     component.onToggle();
     expect(component.task()?.done).toBe(!initialDone);
   });
+
+  it('devrait ajouter et supprimer un tag depuis la vue de detail', async () => {
+    const tempService = TestBed.inject(TaskService);
+    const task = tempService.tasks()[0];
+    await createComponent(String(task.id));
+
+    component.onAddTag('NouveauTagDetail');
+    expect(component.task()?.tags).toContain('NouveauTagDetail');
+
+    component.onRemoveTag('NouveauTagDetail');
+    expect(component.task()?.tags).not.toContain('NouveauTagDetail');
+  });
 });
