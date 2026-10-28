@@ -6,9 +6,7 @@ describe('TaskService', () => {
   let service: TaskService;
 
   beforeEach(() => {
-    // TODO Mission 8 : ajoute ici  localStorage.clear();
-    //   Sans ça, ce qu'un test enregistre dans le localStorage est relu par le test suivant,
-    //   et les tests ne partent plus tous des mêmes tâches de départ.
+    localStorage.clear();
     TestBed.configureTestingModule({});
     service = TestBed.inject(TaskService);
   });
@@ -74,12 +72,11 @@ describe('TaskService', () => {
       expect(uniqueIds.size).toBe(ids.length);
     });
 
-    it('devrait ajouter une tache avec date limite, heure et rappel', () => {
-      service.add('Finir les tests unitaires', 'haute', '2026-10-28', '16:00', '1h');
+    it('devrait ajouter une tache avec date limite et heure', () => {
+      service.add('Finir les tests unitaires', 'haute', '2026-10-28', '16:00');
       const added = service.tasks()[service.tasks().length - 1];
       expect(added.dueDate).toBe('2026-10-28');
       expect(added.dueTime).toBe('16:00');
-      expect(added.reminder).toBe('1h');
     });
 
     it('devrait detecter si une tache est en retard avec isLate()', () => {
@@ -324,6 +321,17 @@ describe('TaskService', () => {
       expect(tags).toContain('Angular');
       expect(tags).toContain('Travail');
       expect(tags).toContain('Urgent');
+    });
+
+    it('devrait mettre a jour le statut Kanban avec updateStatus', () => {
+      const task = service.tasks()[0];
+      service.updateStatus(task.id, 'done');
+      expect(service.getById(task.id)?.status).toBe('done');
+      expect(service.getById(task.id)?.done).toBe(true);
+
+      service.updateStatus(task.id, 'in_progress');
+      expect(service.getById(task.id)?.status).toBe('in_progress');
+      expect(service.getById(task.id)?.done).toBe(false);
     });
   });
 });

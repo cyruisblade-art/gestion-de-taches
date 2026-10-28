@@ -145,17 +145,92 @@ export class TaskDetailComponent {
   }
 
   insertFormat(type: 'bold' | 'italic' | 'list' | 'task' | 'link' | 'heading'): void {
-    const current = this.descriptionInput();
-    const formats: Record<string, string> = {
-      bold: '**Texte en gras**',
-      italic: '*Texte en italique*',
-      list: '\n- Élément de liste',
-      task: '\n- [ ] Action à réaliser',
-      link: '[Titre du lien](https://exemple.com)',
-      heading: '\n### Nouveau titre',
-    };
-    this.descriptionInput.set(current ? `${current} ${formats[type]}` : formats[type]);
+    const textarea = document.getElementById('description-textarea') as HTMLTextAreaElement | null;
+
+    if (!textarea) {
+      // Fallback sans accès DOM : on ajoute à la fin
+      const snippets: Record<string, string> = {
+        bold: '\n**Texte en gras**',
+        italic: '\n*Texte en italique*',
+        list: '\n- Élément de liste',
+        task: '\n- [ ] Action à réaliser',
+        link: '\n[Titre du lien](https://exemple.com)',
+        heading: '\n### Nouveau titre',
+      };
+      this.descriptionInput.set(this.descriptionInput() + (snippets[type] ?? ''));
+      return;
+    }
+
+    const start  = textarea.selectionStart ?? 0;
+    const end    = textarea.selectionEnd   ?? 0;
+    const sel    = textarea.value.slice(start, end);
+    const before = textarea.value.slice(0, start);
+    const after  = textarea.value.slice(end);
+
+    let snippet: string;
+    let cursorAfter: number;
+
+    // S'assurer d'aller à la ligne si nécessaire pour les éléments de bloc ou si collé
+    const needsLeadingNewline = before.length > 0 && !before.endsWith('\n');
+
+    switch (type) {
+      case 'bold': {
+        const prefix = (before.length > 0 && !/[\s\n]$/.test(before)) ? ' ' : '';
+        snippet     = sel ? `${prefix}**${sel}**` : `${prefix}**Texte en gras**`;
+        cursorAfter = sel ? start + snippet.length : start + prefix.length + 2;
+        break;
+      }
+      case 'italic': {
+        const prefix = (before.length > 0 && !/[\s\n]$/.test(before)) ? ' ' : '';
+        snippet     = sel ? `${prefix}*${sel}*` : `${prefix}*Texte en italique*`;
+        cursorAfter = sel ? start + snippet.length : start + prefix.length + 1;
+        break;
+      }
+      case 'heading': {
+        const nl = needsLeadingNewline ? '\n' : '';
+        snippet     = `${nl}### ${sel || 'Nouveau titre'}\n`;
+        cursorAfter = start + snippet.length;
+        break;
+      }
+      case 'list': {
+        const nl = needsLeadingNewline ? '\n' : '';
+        snippet     = `${nl}- ${sel || 'Élément de liste'}\n`;
+        cursorAfter = start + snippet.length;
+        break;
+      }
+      case 'task': {
+        const nl = needsLeadingNewline ? '\n' : '';
+        snippet     = `${nl}- [ ] ${sel || 'Action à réaliser'}\n`;
+        cursorAfter = start + snippet.length;
+        break;
+      }
+      case 'link': {
+        // Un lien sur sa propre ligne si précédé d'un saut de ligne ou d'une liste
+        const nl = needsLeadingNewline ? '\n' : (before.length > 0 && !/[\s\n]$/.test(before) ? ' ' : '');
+        snippet     = sel ? `${nl}[${sel}](https://exemple.com)` : `${nl}[Titre du lien](https://exemple.com)`;
+        cursorAfter = start + snippet.length;
+        break;
+      }
+      default:
+        return;
+    }
+
+    const newValue = before + snippet + after;
+
+    // Met à jour le signal → Angular planifie la détection de changements (microtâche zone.js)
+    this.descriptionInput.set(newValue);
+
+    // setTimeout(fn, 0) s'exécute APRÈS la microtâche Angular (CD + [value] reset),
+    // ce qui garantit que le curseur est positionné en dernier.
+    setTimeout(() => {
+      if (document.body.contains(textarea)) {
+        textarea.focus();
+        textarea.setSelectionRange(cursorAfter, cursorAfter);
+      }
+    }, 0);
   }
+
+
 
   /**
    * Convertit une syntaxe markdown légère en HTML sécurisé
@@ -270,16 +345,5 @@ export class TaskDetailComponent {
     return new Date(dueStr) < new Date();
   }
 
-  reminderLabel(): string {
-    const t = this.task();
-    if (!t?.reminder) return 'Aucun';
-    const map: Record<string, string> = {
-      '5min': '5 minutes avant',
-      '15min': '15 minutes avant',
-      '30min': '30 minutes avant',
-      '1h': '1 heure avant',
-      '1day': '1 jour avant',
-    };
-    return map[t.reminder] ?? t.reminder;
-  }
 }
+

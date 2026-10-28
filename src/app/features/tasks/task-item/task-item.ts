@@ -70,21 +70,7 @@ export class TaskItemComponent {
     return t.dueTime ? `${t.dueDate} à ${t.dueTime}` : t.dueDate;
   }
 
-  /**
-   * Retourne le libellé lisible du rappel
-   */
-  reminderLabel(): string {
-    const r = this.task().reminder;
-    if (!r) return '';
-    const map: Record<string, string> = {
-      '5min': 'Rappel 5 min',
-      '15min': 'Rappel 15 min',
-      '30min': 'Rappel 30 min',
-      '1h': 'Rappel 1 h',
-      '1day': 'Rappel 1 j',
-    };
-    return map[r] ?? r;
-  }
+
 
   /**
    * Retourne la progression des sous-tâches

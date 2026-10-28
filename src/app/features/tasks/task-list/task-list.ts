@@ -1,19 +1,29 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { TaskService } from '../task';
 import { TaskFormComponent } from '../task-form/task-form';
 import { TaskItemComponent } from '../task-item/task-item';
-import { Task, ReminderDelay } from '../task.model';
+import { Task } from '../task.model';
 
-type FilterType = 'toutes' | 'actives' | 'terminées';
 
-// TODO Bonus A : crée ici le type des choix de tri, sur le modèle de FilterType :
-//   type SortType = 'ajout' | 'priorite';
+export type FilterType = 'toutes' | 'actives' | 'terminées';
+export type ViewMode = 'liste' | 'kanban' | 'calendrier' | 'tableau';
+
+export interface CalendarDay {
+  date: Date;
+  dateString: string;
+  dayNumber: number;
+  isCurrentMonth: boolean;
+  isToday: boolean;
+  tasks: Task[];
+}
 
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [TaskFormComponent, TaskItemComponent, TitleCasePipe],
+  imports: [TaskFormComponent, TaskItemComponent, TitleCasePipe, RouterLink, FormsModule],
   templateUrl: './task-list.html',
   styleUrl: './task-list.css',
 })
@@ -23,14 +33,25 @@ export class TaskListComponent {
   readonly tasks = this.taskService.tasks;
   readonly remainingCount = this.taskService.remainingCount;
 
+  // --- Filtres d'état et tags ---
   activeFilter = signal<FilterType>('toutes');
   readonly filters: FilterType[] = ['toutes', 'actives', 'terminées'];
 
-  /** Filtre actif par étiquette/tag */
   activeTagFilter = signal<string | null>(null);
-
-  /** Liste dynamique des tags disponibles */
   readonly allAvailableTags = this.taskService.allAvailableTags;
+
+  // --- Mode de vue (Notion style) ---
+  activeView = signal<ViewMode>('liste');
+  readonly views: { mode: ViewMode; label: string }[] = [
+    { mode: 'liste', label: 'Liste' },
+    { mode: 'kanban', label: 'Kanban' },
+    { mode: 'calendrier', label: 'Calendrier' },
+    { mode: 'tableau', label: 'Tableau' },
+  ];
+
+  setView(mode: ViewMode): void {
+    this.activeView.set(mode);
+  }
 
   readonly filteredTasks = computed<Task[]>(() => {
     const filter = this.activeFilter();
@@ -44,6 +65,10 @@ export class TaskListComponent {
     }
     return result;
   });
+
+  setFilter(filter: FilterType): void {
+    this.activeFilter.set(filter);
+  }
 
   setTagFilter(tag: string | null): void {
     if (this.activeTagFilter() === tag) {
@@ -60,13 +85,12 @@ export class TaskListComponent {
     priority: Task['priority'];
     dueDate?: string;
     dueTime?: string;
-    reminder?: ReminderDelay;
     tags?: string[];
   }): void {
     if (data.tags && data.tags.length > 0) {
-      this.taskService.add(data.title, data.priority, data.dueDate, data.dueTime, data.reminder, data.tags);
-    } else if (data.dueDate || data.dueTime || data.reminder) {
-      this.taskService.add(data.title, data.priority, data.dueDate, data.dueTime, data.reminder);
+      this.taskService.add(data.title, data.priority, data.dueDate, data.dueTime, data.tags);
+    } else if (data.dueDate || data.dueTime) {
+      this.taskService.add(data.title, data.priority, data.dueDate, data.dueTime);
     } else {
       this.taskService.add(data.title, data.priority);
     }
@@ -77,26 +101,145 @@ export class TaskListComponent {
   }
 
   onRemoved(id: number): void {
-    // TODO Mission 4 : avant de supprimer, demande confirmation à l'utilisateur.
-    //   Entoure la ligne ci-dessous avec :
-    //     if (window.confirm('Voulez-vous vraiment supprimer cette tâche ?')) {
-    //       ...la ligne de suppression...
-    //     }
-    //   Attention : le test « onRemoved doit appeler taskService.remove » de task-list.spec.ts
-    //   va échouer, car dans un test personne ne peut cliquer sur OK. Ajoute au début de ce test :
-    //     vi.spyOn(window, 'confirm').mockReturnValue(true);
-    //   (ça veut dire : « fais comme si l'utilisateur avait cliqué sur OK »)
     this.taskService.remove(id);
   }
 
-  // TODO Mission 6 : crée ici la fonction appelée par le bouton « Supprimer les tâches terminées » :
-  //   onRemoveDone(): void {
-  //     if (window.confirm('Supprimer toutes les tâches terminées ?')) {
-  //       this.taskService.removeDone();
-  //     }
-  //   }
+  // --- Gestion du Kanban ---
+  readonly kanbanColumns: { id: 'todo' | 'in_progress' | 'done'; label: string }[] = [
+    { id: 'todo', label: 'À faire' },
+    { id: 'in_progress', label: 'En cours' },
+    { id: 'done', label: 'Terminé' },
+  ];
 
-  setFilter(filter: FilterType): void {
-    this.activeFilter.set(filter);
+  getKanbanTasks(status: 'todo' | 'in_progress' | 'done'): Task[] {
+    return this.filteredTasks().filter((t) => {
+      const s = t.status || (t.done ? 'done' : 'todo');
+      return s === status;
+    });
+  }
+
+  onStatusChange(taskId: number, status: 'todo' | 'in_progress' | 'done'): void {
+    this.taskService.updateStatus(taskId, status);
+  }
+
+  draggedTaskId = signal<number | null>(null);
+
+  onDragStart(taskId: number): void {
+    this.draggedTaskId.set(taskId);
+  }
+
+  onDragOver(e: DragEvent): void {
+    e.preventDefault();
+  }
+
+  onDrop(status: 'todo' | 'in_progress' | 'done'): void {
+    const id = this.draggedTaskId();
+    if (id !== null) {
+      this.taskService.updateStatus(id, status);
+      this.draggedTaskId.set(null);
+    }
+  }
+
+  // --- Gestion du Calendrier ---
+  currentCalendarDate = signal<Date>(new Date());
+  readonly weekDays: string[] = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+  calendarMonthLabel = computed(() => {
+    const date = this.currentCalendarDate();
+    const formatted = date.toLocaleDateString('fr-FR', {
+      month: 'long',
+      year: 'numeric',
+    });
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+  });
+
+  prevMonth(): void {
+    const cur = this.currentCalendarDate();
+    this.currentCalendarDate.set(new Date(cur.getFullYear(), cur.getMonth() - 1, 1));
+  }
+
+  nextMonth(): void {
+    const cur = this.currentCalendarDate();
+    this.currentCalendarDate.set(new Date(cur.getFullYear(), cur.getMonth() + 1, 1));
+  }
+
+  todayMonth(): void {
+    this.currentCalendarDate.set(new Date());
+  }
+
+  calendarGrid = computed<CalendarDay[]>(() => {
+    const cur = this.currentCalendarDate();
+    const year = cur.getFullYear();
+    const month = cur.getMonth();
+
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const startOffset = (firstDayIndex + 6) % 7;
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    const days: CalendarDay[] = [];
+    const now = new Date();
+    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const allTasks = this.filteredTasks();
+
+    // Jours du mois précédent
+    for (let i = startOffset - 1; i >= 0; i--) {
+      const d = daysInPrevMonth - i;
+      const date = new Date(year, month - 1, d);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(d).padStart(2, '0');
+      const dateStr = `${y}-${m}-${day}`;
+      days.push({
+        date,
+        dateString: dateStr,
+        dayNumber: d,
+        isCurrentMonth: false,
+        isToday: dateStr === todayStr,
+        tasks: allTasks.filter((t) => t.dueDate === dateStr),
+      });
+    }
+
+    // Jours du mois en cours
+    for (let d = 1; d <= daysInMonth; d++) {
+      const date = new Date(year, month, d);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(d).padStart(2, '0');
+      const dateStr = `${y}-${m}-${day}`;
+      days.push({
+        date,
+        dateString: dateStr,
+        dayNumber: d,
+        isCurrentMonth: true,
+        isToday: dateStr === todayStr,
+        tasks: allTasks.filter((t) => t.dueDate === dateStr),
+      });
+    }
+
+    // Jours du mois suivant pour compléter la grille
+    const remaining = (7 - (days.length % 7)) % 7;
+    for (let d = 1; d <= remaining; d++) {
+      const date = new Date(year, month + 1, d);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(d).padStart(2, '0');
+      const dateStr = `${y}-${m}-${day}`;
+      days.push({
+        date,
+        dateString: dateStr,
+        dayNumber: d,
+        isCurrentMonth: false,
+        isToday: dateStr === todayStr,
+        tasks: allTasks.filter((t) => t.dueDate === dateStr),
+      });
+    }
+
+    return days;
+  });
+
+  subTasksProgress(task: Task) {
+    return this.taskService.getSubTasksProgress(task);
   }
 }

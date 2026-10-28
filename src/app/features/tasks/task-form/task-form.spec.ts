@@ -84,24 +84,21 @@ describe('TaskFormComponent', () => {
       expect(component.priority()).toBe('normale');
     });
 
-    it('devrait emettre created avec dueDate, dueTime et reminder si renseignes', () => {
+    it('devrait emettre created avec dueDate et dueTime si renseignes', () => {
       const spy = vi.spyOn(component.created, 'emit');
       component.title.set('Finir les tests unitaires');
       component.priority.set('haute');
       component.dueDate.set('2026-10-28');
       component.dueTime.set('16:00');
-      component.reminder.set('1h');
       component.onSubmit();
       expect(spy).toHaveBeenCalledWith({
         title: 'Finir les tests unitaires',
         priority: 'haute',
         dueDate: '2026-10-28',
         dueTime: '16:00',
-        reminder: '1h',
       });
       expect(component.dueDate()).toBe('');
       expect(component.dueTime()).toBe('');
-      expect(component.reminder()).toBe('');
     });
   });
 

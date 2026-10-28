@@ -1,4 +1,3 @@
-export type ReminderDelay = '5min' | '15min' | '30min' | '1h' | '1day';
 
 export interface SubTask {
   id: string;
@@ -21,8 +20,7 @@ export interface Task {
   dueDate?: string;
   /** Heure limite au format 'HH:MM', ex. '16:00' */
   dueTime?: string;
-  /** Délai de rappel avant l'échéance */
-  reminder?: ReminderDelay;
+
   /** Description en texte enrichi / Markdown */
   description?: string;
   /** Notes libres */
