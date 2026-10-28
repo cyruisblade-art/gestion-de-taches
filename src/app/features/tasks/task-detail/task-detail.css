@@ -886,8 +886,59 @@
     padding-right: 1rem;
   }
 
+  .detail-card__top-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+  }
+
+  .detail-card__title {
+    font-size: 1.25rem;
+  }
+
+  .detail-title-wrapper {
+    flex-wrap: wrap;
+  }
+
+  .detail-title-edit-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .detail-title-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .editor-toolbar {
+    gap: 0.2rem;
+    padding: 0.25rem;
+  }
+
+  .toolbar-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .subtask-add-form {
+    flex-direction: column;
+  }
+
+  .subtask-add-form .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
   .detail-footer-actions {
     width: 100%;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .detail-footer-actions button,
+  .detail-footer-actions a {
+    width: 100%;
+    justify-content: center;
   }
 }

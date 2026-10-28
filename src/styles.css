@@ -89,15 +89,29 @@ app-root {
   min-height: 100vh;
 }
 
-/* Page layout shell */
+/* Page layout shell - fluide et adaptable aux petits écrans et écrans larges */
 body > app-root {
-  padding: 2rem 1.5rem 4rem;
+  padding: clamp(1rem, 3vw, 2.5rem) clamp(0.75rem, 3.5vw, 2rem) 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) {
   body > app-root {
-    padding: 1.25rem 1rem 3rem;
+    padding: 0.75rem 0.5rem 2.5rem;
   }
+}
+
+/* Utilitaires responsives globaux */
+img, svg, video, canvas, audio, iframe, embed, object {
+  max-width: 100%;
+  height: auto;
+}
+
+input, button, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  max-width: 100%;
 }
 
 /* --- Typography --- */
