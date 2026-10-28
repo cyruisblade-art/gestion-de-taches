@@ -1,18 +1,14 @@
 <section class="detail-page" aria-label="Détail de la tâche">
   <div class="detail-page__nav">
     <a routerLink="/tasks" class="back-link" aria-label="Retour à la liste des tâches">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-        <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0"/>
-      </svg>
+      <svg lucideArrowLeft [size]="16"></svg>
       Retour à la liste
     </a>
   </div>
 
   @if (task() === null) {
     <div class="detail-error" role="alert">
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16" class="detail-error__icon" aria-hidden="true">
-        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
-      </svg>
+      <svg lucideAlertCircle [size]="48" class="detail-error__icon"></svg>
       <h2 class="detail-error__title">Tâche introuvable</h2>
       <p class="detail-error__desc">L'identifiant fourni ne correspond à aucune tâche existante.</p>
       <a routerLink="/tasks" class="btn-primary">Retour à la liste</a>
@@ -47,13 +43,11 @@
               (click)="onToggle()"
               [title]="task()!.done ? 'Cliquer pour réactiver' : 'Cliquer pour marquer terminée'"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                @if (task()!.done) {
-                  <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
-                } @else {
-                  <circle cx="8" cy="8" r="6"/>
-                }
-              </svg>
+              @if (task()!.done) {
+                <svg lucideCheck [size]="12"></svg>
+              } @else {
+                <svg lucideCircle [size]="12"></svg>
+              }
               {{ task()!.done ? 'Terminée' : 'Active' }}
             </button>
           </div>
@@ -74,9 +68,7 @@
               title="Modifier le titre"
               aria-label="Modifier le titre"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
-              </svg>
+              <svg lucidePencil [size]="16"></svg>
             </button>
           </div>
         } @else {
@@ -105,9 +97,7 @@
         <!-- Méta : Échéance -->
         <div class="detail-card__meta-bar">
           <div class="meta-item">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5M1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4z"/>
-            </svg>
+            <svg lucideCalendar [size]="14"></svg>
             <span>Date limite : </span>
             <strong [class.detail-due--late]="isLate()">{{ formattedDueDate() }}</strong>
             @if (isLate()) {
@@ -119,10 +109,7 @@
         <!-- Étiquettes / Tags de la tâche -->
         <div class="detail-tags-bar">
           <span class="detail-tags-label">
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M2 2a1 1 0 0 1 1-1h4.586a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0l-7-7A1 1 0 0 1 2 6.586zm3.5 4a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3"/>
-              <path d="M1.293 7.707A1 1 0 0 1 1 7.086V2a2 2 0 0 1 2-2h5.086a1 1 0 0 1 .707.293l7 7a1 1 0 0 1 0 1.414l-4.586 4.586a1 1 0 0 1-1.414 0z"/>
-            </svg>
+            <svg lucideTag [size]="13"></svg>
             Tags :
           </span>
 
@@ -191,10 +178,7 @@
           <div class="detail-section__header">
             <div class="subtasks-header-left">
               <h2 id="subtasks-heading" class="detail-section__title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z"/>
-                  <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.757.757 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425z"/>
-                </svg>
+                <svg lucideListTodo [size]="18"></svg>
                 Sous-tâches & Étapes
               </h2>
               @if (subTasksProgress().total > 0) {
@@ -239,9 +223,7 @@
                   title="Supprimer la sous-tâche"
                   aria-label="Supprimer la sous-tâche"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-                  </svg>
+                  <svg lucideX [size]="14"></svg>
                 </button>
               </li>
             } @empty {
@@ -266,9 +248,7 @@
               class="btn btn--secondary"
               [disabled]="!newSubTaskTitle().trim()"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4"/>
-              </svg>
+              <svg lucidePlus [size]="14"></svg>
               Ajouter
             </button>
           </form>
@@ -278,10 +258,7 @@
         <section class="detail-section detail-description" aria-labelledby="desc-heading">
           <div class="detail-section__header">
             <h2 id="desc-heading" class="detail-section__title">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/>
-                <path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/>
-              </svg>
+              <svg lucideFileText [size]="18"></svg>
               Description & Notes détaillées
             </h2>
 
@@ -291,9 +268,7 @@
                 class="btn btn--secondary btn--sm"
                 (click)="startEditingDescription()"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
-                </svg>
+                <svg lucideEdit [size]="13"></svg>
                 Modifier
               </button>
             }
@@ -356,9 +331,7 @@
           <section class="detail-section detail-notes" aria-labelledby="notes-heading">
             <div class="detail-section__header">
               <h2 id="notes-heading" class="detail-section__title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="M2.5 1A1.5 1.5 0 0 0 1 2.5v11A1.5 1.5 0 0 0 2.5 15h6.086a1.5 1.5 0 0 0 1.06-.44l4.915-4.914A1.5 1.5 0 0 0 15 8.586V2.5A1.5 1.5 0 0 0 13.5 1zM2 2.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 .5.5V8H9.5A1.5 1.5 0 0 0 8 9.5V14H2.5a.5.5 0 0 1-.5-.5zm7 11.293V9.5a.5.5 0 0 1 .5-.5h4.293z"/>
-                </svg>
+                <svg lucideStickyNote [size]="16"></svg>
                 Notes rapides
               </h2>
               @if (notesSaved()) {
@@ -379,10 +352,7 @@
           <section class="detail-section detail-links" aria-labelledby="links-heading">
             <div class="detail-section__header">
               <h2 id="links-heading" class="detail-section__title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                  <path d="M6.354 5.5H4a3 3 0 0 0 0 6h3a3 3 0 0 0 2.83-4H9c-.086 0-.17.01-.25.031A2 2 0 0 1 7 10.5H4a2 2 0 1 1 0-4h1.535c.218-.376.495-.714.82-1z"/>
-                  <path d="M9 5.5a3 3 0 0 0-2.83 4h1.098A2 2 0 0 1 9 6.5h3a2 2 0 1 1 0 4h-1.535a4 4 0 0 1-.82 1H12a3 3 0 1 0 0-6z"/>
-                </svg>
+                <svg lucideLink [size]="16"></svg>
                 Liens & Références
               </h2>
               <button
@@ -427,10 +397,7 @@
               @for (lnk of task()!.links; track lnk.id) {
                 <li class="link-item">
                   <a [href]="lnk.url" target="_blank" rel="noopener noreferrer" class="link-item__anchor">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
-                      <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
-                    </svg>
+                    <svg lucideExternalLink [size]="13"></svg>
                     <span>{{ lnk.label || lnk.url }}</span>
                   </a>
                   <button
@@ -440,9 +407,7 @@
                     title="Supprimer ce lien"
                     aria-label="Supprimer ce lien"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-                      <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-                    </svg>
+                    <svg lucideX [size]="12"></svg>
                   </button>
                 </li>
               } @empty {
@@ -465,9 +430,7 @@
             class="btn btn--secondary"
             (click)="onToggle()"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
-            </svg>
+            <svg lucideCheck [size]="14"></svg>
             {{ task()!.done ? 'Marquer comme active' : 'Marquer comme terminée' }}
           </button>
 
@@ -477,10 +440,7 @@
             class="btn btn--danger"
             (click)="onRemove()"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true">
-              <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-              <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-            </svg>
+            <svg lucideTrash2 [size]="14"></svg>
             Supprimer la tâche
           </button>
         </div>

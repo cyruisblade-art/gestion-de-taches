@@ -1,11 +1,12 @@
 import { Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { LucideCalendar, LucideCheckSquare, LucideClock, LucideTrash2 } from '@lucide/angular';
 import { Task } from '../task.model';
 
 @Component({
   selector: 'app-task-item',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, LucideCalendar, LucideCheckSquare, LucideClock, LucideTrash2],
   templateUrl: './task-item.html',
   styleUrl: './task-item.css',
 })

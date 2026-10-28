@@ -1,13 +1,29 @@
 import { Component, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
+import {
+  LucideAlertCircle,
+  LucideCalendar,
+  LucideClock,
+  LucidePlus,
+  LucidePlusCircle,
+  LucideTag,
+} from '@lucide/angular';
 import { Task } from '../task.model';
 
 
 @Component({
   selector: 'app-task-form',
   standalone: true,
-  imports: [FormsModule, TitleCasePipe],
+  imports: [
+    FormsModule,
+    TitleCasePipe,
+    LucideAlertCircle,
+    LucideCalendar,
+    LucideClock,
+    LucidePlusCircle,
+    LucideTag,
+  ],
   templateUrl: './task-form.html',
   styleUrl: './task-form.css',
 })
